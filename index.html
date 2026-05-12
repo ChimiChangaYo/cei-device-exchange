@@ -340,7 +340,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
       <div class="nav-btns" style="display:flex;justify-content:space-between;margin-top:4px;">
         <button class="btn" onclick="showPanel(0)">← Back</button>
         <div style="display:flex;gap:8px;">
-          <button class="btn" onclick="saveProgress('Check-in Complete | Awaiting Delivery')">💾 Save check-in</button>
+          <button class="btn" onclick="saveProgress('Check-in Complete')">💾 Save check-in</button>
           <button class="btn btn-primary" onclick="showPanel(2)">Next: Pre-exchange →</button>
         </div>
       </div>
@@ -654,19 +654,54 @@ function collectData(stage){
   const exS=elapsed.ex+(starts.ex?Math.floor((Date.now()-starts.ex)/1000):0);
   const coS=elapsed.co+(starts.co?Math.floor((Date.now()-starts.co)/1000):0);
   const{total,done}=countAll();
-  return {
-    EmployeeName:    gv('f-emp-name')||'(no name)',
-    DeviceType:      [...devices].join(', '),
-    MigrationSite:   gv('f-mig-site'),
+  const userInfo = {
+    EmployeeName:    gv('f-emp-name'),
+    AppointmentTime: gv('f-appt'),
+    DateReceived:    gv('f-date-recv'),
+    TimeReceived:    gv('f-time-recv'),
+    CEIUPN:          gv('f-cei-upn'),
     CEIEmail:        gv('f-cei-email'),
     QuantaEmail:     gv('f-q-email'),
-    OldDevice:       gv('f-old-model')+' / '+gv('f-old-serial'),
-    NewDevice:       gv('f-new-model')+' / '+gv('f-new-serial'),
+    UsingQuantaAcct: gv('f-quanta-acct'),
+    TempPassword:    gv('f-temp-pw'),
+    MigrationSite:   gv('f-mig-site'),
     ReceivedByTech:  gv('f-recv-tech'),
+    MobileNumber:    gv('f-mob-num'),
+    MobileSerial:    gv('f-mob-serial'),
+    PersonalPhone:   gv('f-pers-phone'),
+    OldDeviceModel:  gv('f-old-model'),
+    OldDeviceSerial: gv('f-old-serial'),
+    OldDeviceHost:   gv('f-old-host'),
+    NewDeviceModel:  gv('f-new-model'),
+    NewDeviceSerial: gv('f-new-serial'),
+    NewDeviceHost:   gv('f-new-host'),
+    TabletName:      gv('f-tab-name'),
+    TabletSerial:    gv('f-tab-serial'),
+    TabletModel:     gv('f-tab-model'),
+    KeyApplications: [...apps].join(', ')+(gv('f-other-apps')?', '+gv('f-other-apps'):''),
+    OtherApps:       gv('f-other-apps'),
+    AdditionalNotes: gv('f-notes'),
+    DeviceType:      [...devices].join(', '),
+    TechCheckin:     gv('t-tech-ci'),
+    TechPreExchange: gv('t-tech-pre'),
+    TechExchange:    gv('t-tech-ex'),
+    TechCheckout:    gv('t-tech-co'),
     TechSignoff:     gv('f-tech-signoff'),
     EmployeeSignoff: gv('f-emp-signoff'),
-    KeyApplications: [...apps].join(', ')+(gv('f-other-apps')?', '+gv('f-other-apps'):''),
-    AdditionalNotes: gv('f-notes'),
+  };
+  return {
+    EmployeeName:    userInfo.EmployeeName||'(no name)',
+    DeviceType:      userInfo.DeviceType,
+    MigrationSite:   userInfo.MigrationSite,
+    CEIEmail:        userInfo.CEIEmail,
+    QuantaEmail:     userInfo.QuantaEmail,
+    OldDevice:       userInfo.OldDeviceModel+' / '+userInfo.OldDeviceSerial,
+    NewDevice:       userInfo.NewDeviceModel+' / '+userInfo.NewDeviceSerial,
+    ReceivedByTech:  userInfo.ReceivedByTech,
+    TechSignoff:     userInfo.TechSignoff,
+    EmployeeSignoff: userInfo.EmployeeSignoff,
+    KeyApplications: userInfo.KeyApplications,
+    AdditionalNotes: userInfo.AdditionalNotes,
     CheckinTime:     fmt(ciS),
     PreExchangeTime: fmt(preS),
     ExchangeTime:    fmt(exS),
@@ -675,6 +710,7 @@ function collectData(stage){
     TotalTimeSec:    ciS+preS+exS+coS,
     ProgressPct:     total?Math.round(done/total*100):0,
     ChecklistDetail: JSON.stringify(collectChecklist()),
+    UserInfoJSON:    JSON.stringify(userInfo),
     SubmittedAt:     new Date().toISOString(),
     Stage:           stage||currentStage,
     RecordID:        currentRecordId||'',
@@ -807,10 +843,45 @@ function loadRecord(item) {
       });
     } catch(e) {}
   }
-  // Fill basic fields
-  if (item.EmployeeName) document.getElementById('f-emp-name').value = item.EmployeeName;
-  if (item.DeviceType) { item.DeviceType.split(', ').forEach(d => { document.querySelectorAll('#device-toggles .tog').forEach(btn => { if(btn.textContent.trim().includes(d)){btn.classList.add('on');devices.add(d);} }); }); }
-  if (item.MigrationSite) document.getElementById('f-mig-site').value = item.MigrationSite;
+  // Restore all fields from UserInfoJSON if available, else fall back to list columns
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  let ui = {};
+  if (item.UserInfoJSON) { try { ui = JSON.parse(item.UserInfoJSON); } catch(e) {} }
+  set('f-emp-name',    ui.EmployeeName    || item.EmployeeName);
+  set('f-appt',        ui.AppointmentTime);
+  set('f-date-recv',   ui.DateReceived);
+  set('f-time-recv',   ui.TimeReceived);
+  set('f-cei-upn',     ui.CEIUPN);
+  set('f-cei-email',   ui.CEIEmail        || item.CEIEmail);
+  set('f-q-email',     ui.QuantaEmail     || item.QuantaEmail);
+  set('f-quanta-acct', ui.UsingQuantaAcct);
+  set('f-temp-pw',     ui.TempPassword);
+  set('f-mig-site',    ui.MigrationSite   || item.MigrationSite);
+  set('f-recv-tech',   ui.ReceivedByTech  || item.ReceivedByTech);
+  set('f-mob-num',     ui.MobileNumber);
+  set('f-mob-serial',  ui.MobileSerial);
+  set('f-pers-phone',  ui.PersonalPhone);
+  set('f-old-model',   ui.OldDeviceModel);
+  set('f-old-serial',  ui.OldDeviceSerial);
+  set('f-old-host',    ui.OldDeviceHost);
+  set('f-new-model',   ui.NewDeviceModel);
+  set('f-new-serial',  ui.NewDeviceSerial);
+  set('f-new-host',    ui.NewDeviceHost);
+  set('f-tab-name',    ui.TabletName);
+  set('f-tab-serial',  ui.TabletSerial);
+  set('f-tab-model',   ui.TabletModel);
+  set('f-notes',       ui.AdditionalNotes || item.AdditionalNotes);
+  set('f-other-apps',  ui.OtherApps);
+  set('t-tech-ci',     ui.TechCheckin);
+  set('t-tech-pre',    ui.TechPreExchange);
+  set('t-tech-ex',     ui.TechExchange);
+  set('t-tech-co',     ui.TechCheckout);
+  set('f-tech-signoff',ui.TechSignoff     || item.TechSignoff);
+  set('f-emp-signoff', ui.EmployeeSignoff || item.EmployeeSignoff);
+  const dt = ui.DeviceType || item.DeviceType || '';
+  if (dt) { dt.split(', ').forEach(d => { document.querySelectorAll('#device-toggles .tog').forEach(btn => { if(btn.textContent.trim().includes(d)){btn.classList.add('on');devices.add(d);} }); }); }
+  const ka = ui.KeyApplications || item.KeyApplications || '';
+  if (ka) { document.querySelectorAll('#app-toggles .tog').forEach(btn => { if(ka.includes(btn.textContent.trim())){btn.classList.add('on');apps.add(btn.textContent.trim());} }); }
   updateStageBadge(currentStage);
   showRecordBox(currentRecordId, currentStage);
   refresh();
