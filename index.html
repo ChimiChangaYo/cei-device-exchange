@@ -411,11 +411,10 @@ body {
 </head>
 <body>
 
-<!-- ── CONFIG — edit these two lines ── -->
+<!-- ── CONFIG ── -->
 <script>
-  const SP_SITE_URL    = "https://quantaservices.sharepoint.com/sites/CEIDeviceExchange";
-  const SP_LIST_NAME   = "DeviceExchangeRecords";
-  const APP_VERSION    = "3.4.9";
+  const FLOW_URL     = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/be0df293c8204b10882883bfc0effa79/triggers/manual/paths/invoke?api-version=1";
+  const APP_VERSION  = "3.4.9";
 </script>
 
 <!-- ── HEADER ── -->
@@ -1143,85 +1142,47 @@ async function submitToSharePoint() {
   const btn = document.getElementById('submit-btn');
   const status = document.getElementById('submit-status');
 
-  if (!SP_SITE_URL || SP_SITE_URL.includes('YOURTENANT')) {
-    status.className = 'submit-status error';
-    status.textContent = '⚠ Please configure SP_SITE_URL at the top of this file before submitting.';
-    return;
-  }
-
   btn.disabled = true;
   status.className = 'submit-status loading';
   status.textContent = '⏳ Submitting to SharePoint…';
 
   const data = collectData();
 
-  // SharePoint REST API uses the logged-in user's session cookie automatically
-  // when the file is served from the same SharePoint domain.
+  const payload = {
+    EmployeeName:    data.EmployeeName || '(no name)',
+    DeviceType:      data.DeviceType,
+    MigrationSite:   data.MigrationSite,
+    CEIEmail:        data.CEIEmail,
+    QuantaEmail:     data.QuantaEmail,
+    OldDevice:       data.OldDeviceModel + ' / ' + data.OldDeviceSerial,
+    NewDevice:       data.NewDeviceModel + ' / ' + data.NewDeviceSerial,
+    ReceivedByTech:  data.ReceivedByTech,
+    TechSignoff:     data.TechSignoff,
+    EmployeeSignoff: data.EmployeeSignoff,
+    KeyApplications: data.KeyApplications,
+    AdditionalNotes: data.AdditionalNotes,
+    CheckinTime:     data.CheckinTime,
+    PreExchangeTime: data.PreExchangeTime,
+    ExchangeTime:    data.ExchangeTime,
+    CheckoutTime:    data.CheckoutTime,
+    TotalTime:       data.TotalTime,
+    TotalTimeSec:    data.TotalTimeSec,
+    ProgressPct:     data.ProgressPct,
+    ChecklistDetail: data.ChecklistJSON,
+    SubmittedAt:     data.SubmittedAt,
+  };
+
   try {
-    // 1) Get request digest (CSRF token) for SharePoint REST
-    const ctxResp = await fetch(
-      SP_SITE_URL + "/_api/contextinfo",
-      { method: 'POST', headers: { Accept: 'application/json;odata=verbose' }, credentials: 'include' }
-    );
-    if (!ctxResp.ok) throw new Error('Could not get context info — are you logged into SharePoint?');
-    const ctx = await ctxResp.json();
-    const digest = ctx.d.GetContextWebInformation.FormDigestValue;
+    const resp = await fetch(FLOW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-    // 2) Post list item
-    const fields = {
-      __metadata: { type: `SP.Data.${SP_LIST_NAME}ListItem` },
-      Title:              data.EmployeeName || '(no name)',
-      EmployeeName:       data.EmployeeName,
-      DeviceType:         data.DeviceType,
-      DateReceived:       data.DateReceived,
-      MigrationSite:      data.MigrationSite,
-      CEIUsername:        data.CEIUsername,
-      CEIEmail:           data.CEIEmail,
-      QuantaEmail:        data.QuantaEmail,
-      OldDevice:          data.OldDeviceModel + ' / ' + data.OldDeviceSerial,
-      NewDevice:          data.NewDeviceModel + ' / ' + data.NewDeviceSerial,
-      ReceivedByTech:     data.ReceivedByTech,
-      TechSignoff:        data.TechSignoff,
-      EmployeeSignoff:    data.EmployeeSignoff,
-      KeyApplications:    data.KeyApplications,
-      AdditionalNotes:    data.AdditionalNotes,
-      CheckinTime:        data.CheckinTime,
-      PreExchangeTime:    data.PreExchangeTime,
-      ExchangeTime:       data.ExchangeTime,
-      CheckoutTime:       data.CheckoutTime,
-      TotalTime:          data.TotalTime,
-      TotalTimeSec:       data.TotalTimeSec,
-      ItemsDone:          data.ItemsDone,
-      ItemsTotal:         data.ItemsTotal,
-      ProgressPct:        data.ProgressPct,
-      Status:             data.Status,
-      FormVersion:        data.FormVersion,
-      SubmittedAt:        data.SubmittedAt,
-      ChecklistJSON:      data.ChecklistJSON,
-    };
+    if (!resp.ok) throw new Error('Flow returned HTTP ' + resp.status);
 
-    const resp = await fetch(
-      SP_SITE_URL + `/_api/web/lists/getbytitle('${SP_LIST_NAME}')/items`,
-      {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Accept':          'application/json;odata=verbose',
-          'Content-Type':    'application/json;odata=verbose',
-          'X-RequestDigest': digest,
-        },
-        body: JSON.stringify(fields),
-      }
-    );
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(()=>({}));
-      throw new Error(err?.error?.message?.value || `HTTP ${resp.status}`);
-    }
-
-    const result = await resp.json();
     status.className = 'submit-status success';
-    status.textContent = '✓ Submitted successfully! Record ID: ' + result.d.Id + ' — ' + data.EmployeeName + ' · ' + data.TotalTime;
+    status.textContent = '✓ Submitted! ' + (data.EmployeeName || '') + ' · ' + data.TotalTime + ' — record saved to SharePoint.';
     btn.textContent = '✓ Submitted';
 
   } catch(e) {
@@ -1281,11 +1242,7 @@ buildAll();
 refresh();
 document.getElementById('f-date-recv').valueAsDate = new Date();
 
-if (SP_SITE_URL.includes('YOURTENANT')) {
-  document.getElementById('config-banner').classList.add('show');
-} else {
-  loadUser();
-}
+// Flow URL is pre-configured
 </script>
 
 <!--
