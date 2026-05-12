@@ -1,625 +1,1325 @@
-
-<h2 class="sr-only">CEI End User Device Exchange Checklist — interactive digital form with time tracking and status progress</h2>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEI Device Exchange Checklist</title>
 <style>
-  :root { --gap: 12px; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans); font-size: 14px; color: var(--color-text-primary); }
-  .header { padding: 1.25rem 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .header h1 { font-size: 16px; font-weight: 500; }
-  .header .badge { font-size: 11px; padding: 3px 10px; border-radius: var(--border-radius-md); background: var(--color-background-info); color: var(--color-text-info); }
-  .tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); overflow-x: auto; }
-  .tab { padding: 10px 18px; font-size: 13px; cursor: pointer; border: none; background: none; color: var(--color-text-secondary); white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.15s; }
-  .tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: 500; }
-  .tab:hover:not(.active) { color: var(--color-text-primary); background: var(--color-background-secondary); }
-  .panel { display: none; padding: 1.25rem 1.5rem; }
-  .panel.active { display: block; }
-  .section { margin-bottom: 1.5rem; }
-  .section-header { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: space-between; }
-  .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-  .field { display: flex; flex-direction: column; gap: 4px; }
-  .field label { font-size: 12px; color: var(--color-text-secondary); }
-  .field input, .field select { font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); width: 100%; }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--color-border-primary); }
-  .device-toggles { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
-  .device-toggle { padding: 6px 16px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); transition: all 0.15s; }
-  .device-toggle.on { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; }
-  .checklist-group { display: flex; flex-direction: column; gap: 4px; }
-  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: var(--border-radius-md); border: 0.5px solid transparent; transition: background 0.1s; cursor: pointer; }
-  .check-item:hover { background: var(--color-background-secondary); }
-  .check-item input[type=checkbox] { margin-top: 2px; flex-shrink: 0; cursor: pointer; }
-  .check-item.done .check-label { text-decoration: line-through; color: var(--color-text-tertiary); }
-  .check-item.na { opacity: 0.5; }
-  .check-label { font-size: 13px; line-height: 1.5; flex: 1; }
-  .check-na { font-size: 11px; padding: 2px 8px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); color: var(--color-text-secondary); background: none; cursor: pointer; flex-shrink: 0; }
-  .check-na.active { background: var(--color-background-warning); color: var(--color-text-warning); border-color: transparent; }
-  .time-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .time-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 12px; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-primary); transition: all 0.15s; }
-  .time-btn:hover { background: var(--color-background-secondary); }
-  .time-btn.running { background: var(--color-background-success); color: var(--color-text-success); border-color: transparent; }
-  .time-display { font-size: 13px; font-weight: 500; min-width: 70px; color: var(--color-text-primary); }
-  .time-label { font-size: 12px; color: var(--color-text-secondary); }
-  .progress-bar-wrap { height: 4px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; margin: 6px 0; }
-  .progress-bar { height: 100%; background: var(--color-text-info); border-radius: 4px; transition: width 0.3s; }
-  .progress-text { font-size: 12px; color: var(--color-text-secondary); }
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1rem; }
-  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
-  .stat-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
-  .stat-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
-  .stat-sub { font-size: 11px; color: var(--color-text-secondary); }
-  .notes-area { width: 100%; padding: 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); resize: vertical; min-height: 80px; font-family: var(--font-sans); }
-  .sign-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-  .sign-input { flex: 1; min-width: 180px; padding: 7px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
-  .action-btn { padding: 8px 20px; border: none; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; font-weight: 500; }
-  .btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); }
-  .btn-secondary { background: var(--color-background-secondary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-tertiary); }
-  .btn-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
-  .overall-progress { padding: 10px 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 12px; }
-  .sp-note { font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; margin-top: 1rem; }
-  .sp-note strong { font-weight: 500; color: var(--color-text-primary); }
+/* ── CONFIG: set these two values for your tenant ── */
+/* See SETUP INSTRUCTIONS at bottom of this file    */
+
+:root {
+  --brand: #d4281e;        /* Quanta red */
+  --brand-dark: #a01d15;
+  --brand-light: #fdf1f0;
+  --surface: #ffffff;
+  --surface2: #f7f7f6;
+  --surface3: #efefed;
+  --border: rgba(0,0,0,0.10);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text2: #5a5a56;
+  --text3: #8a8a84;
+  --success: #1a7a4a;
+  --success-bg: #eaf5ef;
+  --warning-bg: #fff8e6;
+  --warning: #8a6200;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface2);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+}
+.app-header .logo span {
+  width: 28px; height: 28px;
+  background: var(--brand);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 13px; font-weight: 700;
+}
+.header-right { display: flex; align-items: center; gap: 10px; }
+.user-pill {
+  font-size: 12px; color: var(--text2);
+  padding: 4px 12px;
+  background: var(--surface2);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.btn {
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text);
+  transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { background: var(--surface2); }
+.btn-primary { background: var(--brand); color: white; border-color: transparent; }
+.btn-primary:hover { background: var(--brand-dark); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── PROGRESS BAR ── */
+.progress-strip {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 2rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+.progress-label { font-size: 12px; color: var(--text2); min-width: 110px; }
+.status-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--surface3);
+  color: var(--text2);
+  letter-spacing: 0.02em;
+}
+.status-chip.complete { background: var(--success-bg); color: var(--success); }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ── SIDEBAR NAV ── */
+.sidebar {
+  position: sticky;
+  top: 110px;
+}
+.nav-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.12s;
+  gap: 8px;
+}
+.nav-item:hover { background: var(--surface2); }
+.nav-item.active { border-left-color: var(--brand); background: var(--brand-light); }
+.nav-item .nav-label { font-size: 13px; font-weight: 500; flex: 1; }
+.nav-item .nav-pct { font-size: 11px; color: var(--text3); }
+.nav-item.active .nav-label { color: var(--brand-dark); }
+.nav-divider { height: 1px; background: var(--border); }
+.total-time-box {
+  margin-top: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+}
+.total-time-box .ttl { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.total-time-box .val { font-size: 22px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.total-time-box .sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.card-body { padding: 16px 20px; }
+
+/* ── DEVICE TOGGLE ── */
+.toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.tog {
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.tog.on { background: var(--brand); color: white; border-color: transparent; }
+
+/* ── FIELD GRID ── */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+.field input, .field select, .field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  font-family: inherit;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field-full { grid-column: 1 / -1; }
+
+/* ── TIMER ROW ── */
+.timer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.timer-display {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 72px;
+  color: var(--text);
+}
+.timer-btn {
+  padding: 5px 14px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.timer-btn.running {
+  background: var(--success-bg);
+  color: var(--success);
+  border-color: transparent;
+}
+.subtotal-badge {
+  font-size: 11px;
+  color: var(--text3);
+  padding: 3px 10px;
+  background: var(--surface2);
+  border-radius: 20px;
+}
+
+/* ── CHECKLIST ── */
+.checklist { display: flex; flex-direction: column; gap: 2px; }
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.1s;
+  border: 1px solid transparent;
+}
+.check-row:hover { background: var(--surface2); }
+.check-row input[type=checkbox] { margin-top: 2px; accent-color: var(--brand); flex-shrink: 0; cursor: pointer; }
+.check-row .cl { font-size: 13px; line-height: 1.5; flex: 1; }
+.check-row.done .cl { text-decoration: line-through; color: var(--text3); }
+.check-row.is-na { opacity: 0.5; }
+.na-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: none;
+  color: var(--text3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.na-btn.on { background: var(--warning-bg); color: var(--warning); border-color: transparent; }
+.sl-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: #fff3cd;
+  color: #7a5800;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ── SUMMARY ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.stat {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.stat .s-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.stat .s-val { font-size: 20px; font-weight: 600; }
+.stat .s-sub { font-size: 11px; color: var(--text3); }
+
+/* ── SIGN-OFF ── */
+.signoff-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.signoff-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  font-family: inherit;
+}
+.signoff-input:focus { outline: none; border-color: var(--brand); }
+
+/* ── SUBMIT STATE ── */
+.submit-status {
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.submit-status.success { background: var(--success-bg); color: var(--success); display: flex; }
+.submit-status.error { background: #fdf1f0; color: var(--brand-dark); display: flex; }
+.submit-status.loading { background: var(--surface2); color: var(--text2); display: flex; }
+
+/* ── INFO BOX ── */
+.info-box {
+  background: #eef4fb;
+  border: 1px solid #c0d8f0;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #1a4a7a;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.info-box strong { font-weight: 600; }
+.info-box code {
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 11px;
+  background: rgba(26,74,122,0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── CONFIG BANNER ── */
+.config-banner {
+  background: #fff8e6;
+  border: 1px solid #f0d060;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--warning);
+  margin-bottom: 1rem;
+  display: none;
+}
+.config-banner.show { display: block; }
+
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+}
 </style>
+</head>
+<body>
 
-<div class="header">
-  <div>
-    <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:3px;">CEI · End user device exchange</div>
-    <h1>Device exchange checklist</h1>
+<!-- ── CONFIG — edit these two lines ── -->
+<script>
+  const SP_SITE_URL    = "https://quantaservices.sharepoint.com/sites/CEIDeviceExchange";
+  const SP_LIST_NAME   = "DeviceExchangeRecords";
+  const APP_VERSION    = "3.4.9";
+</script>
+
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <div class="logo">
+    <span>Q</span>
+    CEI Device Exchange
   </div>
-  <div style="display:flex; align-items:center; gap:8px;">
-    <span class="badge" id="status-badge">In progress</span>
-    <button class="action-btn btn-secondary" onclick="exportData()"><i class="ti ti-download" aria-hidden="true"></i> Export</button>
+  <div class="header-right">
+    <span class="user-pill" id="user-display">Loading…</span>
+    <button class="btn btn-sm" onclick="exportJSON()">&#8659; Export JSON</button>
+  </div>
+</header>
+
+<!-- ── PROGRESS STRIP ── -->
+<div class="progress-strip">
+  <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+  <span class="progress-label" id="prog-label">0 / 0 complete</span>
+  <span class="status-chip" id="status-chip">In progress</span>
+</div>
+
+<!-- ── CONFIG WARNING ── -->
+<div style="max-width:1100px; margin:0.75rem auto; padding:0 1rem;">
+  <div class="config-banner" id="config-banner">
+    ⚠ <strong>Setup required:</strong> Edit the <code>SP_SITE_URL</code> and <code>SP_LIST_NAME</code> at the top of this file before deploying to SharePoint. See setup instructions at the bottom of the HTML source.
   </div>
 </div>
 
-<div class="overall-progress">
-  <div style="flex:1;">
-    <div class="progress-bar-wrap">
-      <div class="progress-bar" id="overall-bar" style="width:0%"></div>
-    </div>
-  </div>
-  <span class="progress-text" id="overall-pct">0 / 0 complete</span>
-  <span class="time-display" id="total-time-display">0:00:00 total</span>
-</div>
+<!-- ── MAIN LAYOUT ── -->
+<div class="layout">
 
-<div class="tabs" id="tabs">
-  <button class="tab active" onclick="showTab(0,this)">User info</button>
-  <button class="tab" onclick="showTab(1,this)">Check-in</button>
-  <button class="tab" onclick="showTab(2,this)">Pre-exchange</button>
-  <button class="tab" onclick="showTab(3,this)">Exchange</button>
-  <button class="tab" onclick="showTab(4,this)">Check-out</button>
-  <button class="tab" onclick="showTab(5,this)">Employee sign-off</button>
-</div>
-
-<!-- TAB 0: User Info -->
-<div class="panel active" id="panel-0">
-  <div class="section">
-    <div class="section-header">Device type</div>
-    <div class="device-toggles">
-      <button class="device-toggle" onclick="toggleDevice(this,'Computer')">Computer</button>
-      <button class="device-toggle" onclick="toggleDevice(this,'Phone')">Phone</button>
-      <button class="device-toggle" onclick="toggleDevice(this,'Tablet')">Tablet</button>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>Employee name</label><input type="text" id="emp-name" placeholder="Full name" oninput="syncName()"></div>
-      <div class="field"><label>Appointment time</label><input type="text" id="appt-time" placeholder="HH:MM or N/A"></div>
-      <div class="field"><label>Date received</label><input type="date" id="date-recv"></div>
-      <div class="field"><label>Time received</label><input type="time" id="time-recv"></div>
-      <div class="field"><label>Company mobile number</label><input type="text" id="mob-num" placeholder="(___) ___-____"></div>
-      <div class="field"><label>Personal phone number</label><input type="text" id="pers-phone" placeholder="(___) ___-____"></div>
-      <div class="field"><label>Company mobile serial</label><input type="text" id="mob-serial" placeholder="Serial #"></div>
-      <div class="field"><label>CEI username (samAccountName)</label><input type="text" id="cei-user"></div>
-      <div class="field"><label>CEI UPN</label><input type="text" id="cei-upn" placeholder="user@cei.com"></div>
-      <div class="field"><label>CEI email</label><input type="text" id="cei-email" placeholder="user@cei.com"></div>
-      <div class="field"><label>Quanta email</label><input type="text" id="q-email" placeholder="user@quantaservices.com"></div>
-      <div class="field"><label>Migration site</label><input type="text" id="mig-site"></div>
-      <div class="field"><label>Using Quanta account?</label>
-        <select id="quanta-acct"><option value="">— select —</option><option>Yes</option><option>No</option></select>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <div class="nav-item active" id="nav-0" onclick="showPanel(0)">
+        <span class="nav-label">User info</span>
+        <span class="nav-pct" id="npct-0"></span>
       </div>
-      <div class="field"><label>Temporary password tested</label><input type="text" id="temp-pw" placeholder="Test password"></div>
-      <div class="field"><label>Old device model</label><input type="text" id="old-model"></div>
-      <div class="field"><label>Old device serial</label><input type="text" id="old-serial"></div>
-      <div class="field"><label>Old device hostname</label><input type="text" id="old-host"></div>
-      <div class="field"><label>New device model</label><input type="text" id="new-model"></div>
-      <div class="field"><label>New device serial</label><input type="text" id="new-serial"></div>
-      <div class="field"><label>New device hostname</label><input type="text" id="new-host"></div>
-      <div class="field"><label>Tablet name</label><input type="text" id="tab-name"></div>
-      <div class="field"><label>Tablet serial</label><input type="text" id="tab-serial"></div>
-      <div class="field"><label>Tablet model</label><input type="text" id="tab-model"></div>
-      <div class="field"><label>Received by technician</label><input type="text" id="recv-tech"></div>
+      <div class="nav-divider"></div>
+      <div class="nav-item" id="nav-1" onclick="showPanel(1)">
+        <span class="nav-label">Check-in</span>
+        <span class="nav-pct" id="npct-1"></span>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-item" id="nav-2" onclick="showPanel(2)">
+        <span class="nav-label">Pre-exchange</span>
+        <span class="nav-pct" id="npct-2"></span>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-item" id="nav-3" onclick="showPanel(3)">
+        <span class="nav-label">Exchange</span>
+        <span class="nav-pct" id="npct-3"></span>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-item" id="nav-4" onclick="showPanel(4)">
+        <span class="nav-label">Check-out</span>
+        <span class="nav-pct" id="npct-4"></span>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-item" id="nav-5" onclick="showPanel(5)">
+        <span class="nav-label">Sign-off &amp; submit</span>
+        <span class="nav-pct" id="npct-5"></span>
+      </div>
+    </nav>
+    <div class="total-time-box">
+      <div class="ttl">Total time elapsed</div>
+      <div class="val" id="total-clock">0:00:00</div>
+      <div class="sub" id="phase-breakdown">All phases</div>
     </div>
-  </div>
-  <div class="section">
-    <div class="section-header">Key applications</div>
-    <div class="device-toggles" id="key-apps">
-      <button class="device-toggle" onclick="toggleApp(this)">Visio</button>
-      <button class="device-toggle" onclick="toggleApp(this)">Project</button>
-      <button class="device-toggle" onclick="toggleApp(this)">Power BI Pro</button>
-      <button class="device-toggle" onclick="toggleApp(this)">Adobe</button>
-    </div>
-    <div class="field" style="margin-top:8px;"><label>Other key applications</label><input type="text" id="other-apps" placeholder="List additional apps…"></div>
-  </div>
-  <div class="section">
-    <div class="section-header">Additional notes / issues</div>
-    <textarea class="notes-area" id="add-notes" placeholder="Note any special circumstances, non-standard applications, photos, files on cellphone, calendar, and other user-specific needs…"></textarea>
-  </div>
-</div>
+  </aside>
 
-<!-- TAB 1: Check-in -->
-<div class="panel" id="panel-1">
-  <div class="section">
-    <div class="section-header">
-      <span>Check-in</span>
-      <div class="time-row">
-        <span class="time-label">Technician:</span>
-        <input class="sign-input" style="width:160px;" type="text" id="tech-checkin" placeholder="Name">
-        <button class="time-btn" id="btn-ci" onclick="toggleTimer('ci')">Start timer</button>
-        <span class="time-display" id="disp-ci">0:00:00</span>
+  <!-- PANELS -->
+  <main>
+
+    <!-- ── PANEL 0: USER INFO ── -->
+    <div class="panel active" id="panel-0">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Device type</span>
+        </div>
+        <div class="card-body">
+          <div class="toggle-group">
+            <button class="tog" onclick="togDevice(this,'Computer')">💻 Computer</button>
+            <button class="tog" onclick="togDevice(this,'Phone')">📱 Phone</button>
+            <button class="tog" onclick="togDevice(this,'Tablet')">📋 Tablet</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Employee &amp; account info</span></div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field"><label>Employee name</label><input type="text" id="f-emp-name" placeholder="Full name" oninput="autoFillSignoff()"></div>
+            <div class="field"><label>Appointment time</label><input type="text" id="f-appt" placeholder="HH:MM or N/A"></div>
+            <div class="field"><label>Date received</label><input type="date" id="f-date-recv"></div>
+            <div class="field"><label>Time received</label><input type="time" id="f-time-recv"></div>
+            <div class="field"><label>CEI username (samAccountName)</label><input type="text" id="f-cei-user"></div>
+            <div class="field"><label>CEI UPN</label><input type="text" id="f-cei-upn" placeholder="user@cei.com"></div>
+            <div class="field"><label>CEI email</label><input type="text" id="f-cei-email" placeholder="user@cei.com"></div>
+            <div class="field"><label>Quanta email</label><input type="text" id="f-q-email" placeholder="user@quantaservices.com"></div>
+            <div class="field"><label>Using Quanta account?</label>
+              <select id="f-quanta-acct"><option value="">— select —</option><option>Yes</option><option>No</option></select>
+            </div>
+            <div class="field"><label>Temp password tested</label><input type="text" id="f-temp-pw" placeholder="Test password"></div>
+            <div class="field"><label>Migration site</label><input type="text" id="f-mig-site"></div>
+            <div class="field"><label>Received by technician</label><input type="text" id="f-recv-tech"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Company mobile</span></div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field"><label>Company mobile number</label><input type="text" id="f-mob-num" placeholder="(___) ___-____"></div>
+            <div class="field"><label>Mobile serial number</label><input type="text" id="f-mob-serial"></div>
+            <div class="field"><label>Personal phone number</label><input type="text" id="f-pers-phone" placeholder="(___) ___-____"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Devices</span></div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field"><label>Old device model</label><input type="text" id="f-old-model"></div>
+            <div class="field"><label>Old device serial</label><input type="text" id="f-old-serial"></div>
+            <div class="field"><label>Old device hostname</label><input type="text" id="f-old-host"></div>
+            <div class="field"><label>New device model</label><input type="text" id="f-new-model"></div>
+            <div class="field"><label>New device serial</label><input type="text" id="f-new-serial"></div>
+            <div class="field"><label>New device hostname</label><input type="text" id="f-new-host"></div>
+            <div class="field"><label>Tablet name</label><input type="text" id="f-tab-name"></div>
+            <div class="field"><label>Tablet serial</label><input type="text" id="f-tab-serial"></div>
+            <div class="field"><label>Tablet model</label><input type="text" id="f-tab-model"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Key applications</span></div>
+        <div class="card-body">
+          <div class="toggle-group" id="app-toggles">
+            <button class="tog" onclick="togApp(this)">Visio</button>
+            <button class="tog" onclick="togApp(this)">Project</button>
+            <button class="tog" onclick="togApp(this)">Power BI Pro</button>
+            <button class="tog" onclick="togApp(this)">Adobe</button>
+          </div>
+          <div class="field" style="margin-top:12px;">
+            <label>Other applications</label>
+            <input type="text" id="f-other-apps" placeholder="List any additional apps…">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Additional notes / issues</span></div>
+        <div class="card-body">
+          <textarea class="field" id="f-notes" style="width:100%; border:1px solid var(--border2); border-radius:var(--radius); padding:9px 12px; font-size:13px; font-family:inherit; resize:vertical; min-height:90px;" placeholder="Special circumstances, non-standard apps, photos, files on phone, calendar needs…"></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+        <button class="btn btn-primary" onclick="showPanel(1)">Next: Check-in →</button>
       </div>
     </div>
-    <div class="checklist-group" id="cl-checkin"></div>
-  </div>
-  <div class="section">
-    <div class="section-header">Check-in clerk items</div>
-    <div class="checklist-group" id="cl-clerk"></div>
-  </div>
-  <div class="section">
-    <div class="section-header">Employee initials (check-in)</div>
-    <div class="checklist-group" id="cl-emp-checkin"></div>
-  </div>
-</div>
 
-<!-- TAB 2: Pre-exchange -->
-<div class="panel" id="panel-2">
-  <div class="section">
-    <div class="section-header">
-      <span>Pre-device exchange</span>
-      <div class="time-row">
-        <span class="time-label">Technician:</span>
-        <input class="sign-input" style="width:160px;" type="text" id="tech-pre" placeholder="Name">
-        <button class="time-btn" id="btn-pre" onclick="toggleTimer('pre')">Start timer</button>
-        <span class="time-display" id="disp-pre">0:00:00</span>
+    <!-- ── PANEL 1: CHECK-IN ── -->
+    <div class="panel" id="panel-1">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Tech check-in</span>
+          <div class="timer-row">
+            <input style="width:160px; padding:5px 10px; border:1px solid var(--border2); border-radius:var(--radius); font-size:13px;" type="text" id="t-tech-ci" placeholder="Technician name">
+            <button class="timer-btn" id="tbtn-ci" onclick="toggleTimer('ci')">▶ Start</button>
+            <span class="timer-display" id="tdisp-ci">0:00:00</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="checklist" id="cl-checkin"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Check-in clerk items</span></div>
+        <div class="card-body">
+          <div class="checklist" id="cl-clerk"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Employee initials — check-in</span></div>
+        <div class="card-body">
+          <div class="checklist" id="cl-emp-ci"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <button class="btn" onclick="showPanel(0)">← Back</button>
+        <button class="btn btn-primary" onclick="showPanel(2)">Next: Pre-exchange →</button>
       </div>
     </div>
-    <div class="checklist-group" id="cl-pre"></div>
-  </div>
-</div>
 
-<!-- TAB 3: Exchange -->
-<div class="panel" id="panel-3">
-  <div class="section">
-    <div class="section-header">
-      <span>Device exchange</span>
-      <div class="time-row">
-        <span class="time-label">Technician:</span>
-        <input class="sign-input" style="width:160px;" type="text" id="tech-ex" placeholder="Name">
-        <button class="time-btn" id="btn-ex" onclick="toggleTimer('ex')">Start timer</button>
-        <span class="time-display" id="disp-ex">0:00:00</span>
+    <!-- ── PANEL 2: PRE-EXCHANGE ── -->
+    <div class="panel" id="panel-2">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pre-device exchange</span>
+          <div class="timer-row">
+            <input style="width:160px; padding:5px 10px; border:1px solid var(--border2); border-radius:var(--radius); font-size:13px;" type="text" id="t-tech-pre" placeholder="Technician name">
+            <button class="timer-btn" id="tbtn-pre" onclick="toggleTimer('pre')">▶ Start</button>
+            <span class="timer-display" id="tdisp-pre">0:00:00</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="checklist" id="cl-pre"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <button class="btn" onclick="showPanel(1)">← Back</button>
+        <button class="btn btn-primary" onclick="showPanel(3)">Next: Exchange →</button>
       </div>
     </div>
-    <div class="checklist-group" id="cl-ex"></div>
-  </div>
-</div>
 
-<!-- TAB 4: Check-out -->
-<div class="panel" id="panel-4">
-  <div class="section">
-    <div class="section-header">
-      <span>Check-out</span>
-      <div class="time-row">
-        <span class="time-label">Technician:</span>
-        <input class="sign-input" style="width:160px;" type="text" id="tech-co" placeholder="Name">
-        <button class="time-btn" id="btn-co" onclick="toggleTimer('co')">Start timer</button>
-        <span class="time-display" id="disp-co">0:00:00</span>
+    <!-- ── PANEL 3: EXCHANGE ── -->
+    <div class="panel" id="panel-3">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Device exchange</span>
+          <div class="timer-row">
+            <input style="width:160px; padding:5px 10px; border:1px solid var(--border2); border-radius:var(--radius); font-size:13px;" type="text" id="t-tech-ex" placeholder="Technician name">
+            <button class="timer-btn" id="tbtn-ex" onclick="toggleTimer('ex')">▶ Start</button>
+            <span class="timer-display" id="tdisp-ex">0:00:00</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="checklist" id="cl-ex"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <button class="btn" onclick="showPanel(2)">← Back</button>
+        <button class="btn btn-primary" onclick="showPanel(4)">Next: Check-out →</button>
       </div>
     </div>
-    <div class="checklist-group" id="cl-co"></div>
-  </div>
-</div>
 
-<!-- TAB 5: Employee Sign-off -->
-<div class="panel" id="panel-5">
-  <div class="section">
-    <div class="section-header">Employee check-out confirmation</div>
-    <div class="checklist-group" id="cl-emp-co"></div>
-  </div>
-  <div class="section">
-    <div class="section-header">Tech sign-off</div>
-    <div class="sign-row">
-      <input class="sign-input" type="text" id="tech-signoff" placeholder="Technician name (print)">
-      <span class="time-display" id="total-time-final">Total: 0:00:00</span>
+    <!-- ── PANEL 4: CHECK-OUT ── -->
+    <div class="panel" id="panel-4">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Check-out</span>
+          <div class="timer-row">
+            <input style="width:160px; padding:5px 10px; border:1px solid var(--border2); border-radius:var(--radius); font-size:13px;" type="text" id="t-tech-co" placeholder="Technician name">
+            <button class="timer-btn" id="tbtn-co" onclick="toggleTimer('co')">▶ Start</button>
+            <span class="timer-display" id="tdisp-co">0:00:00</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="checklist" id="cl-co"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <button class="btn" onclick="showPanel(3)">← Back</button>
+        <button class="btn btn-primary" onclick="showPanel(5)">Next: Sign-off →</button>
+      </div>
     </div>
-  </div>
-  <div class="section">
-    <div class="section-header">Employee sign-off</div>
-    <div class="sign-row">
-      <input class="sign-input" type="text" id="emp-signoff" placeholder="Employee name (print/sign)">
-      <button class="action-btn btn-primary" onclick="completeForm()">Mark as complete</button>
+
+    <!-- ── PANEL 5: SIGN-OFF & SUBMIT ── -->
+    <div class="panel" id="panel-5">
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Employee check-out confirmation</span></div>
+        <div class="card-body">
+          <div class="checklist" id="cl-emp-co"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Summary</span></div>
+        <div class="card-body">
+          <div class="stats-grid" id="summary-stats"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Sign-off</span></div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field">
+              <label>Technician (print name)</label>
+              <input type="text" id="f-tech-signoff" placeholder="Technician name">
+            </div>
+            <div class="field">
+              <label>Employee (print / sign)</label>
+              <input type="text" id="f-emp-signoff" placeholder="Employee name">
+            </div>
+          </div>
+
+          <div class="signoff-row" style="margin-top:16px;">
+            <button class="btn btn-primary" id="submit-btn" onclick="submitToSharePoint()">
+              &#10003; Submit to SharePoint
+            </button>
+            <button class="btn" onclick="exportJSON()">&#8659; Export JSON</button>
+          </div>
+
+          <div class="submit-status" id="submit-status"></div>
+
+          <div class="info-box" style="margin-top:16px;">
+            <strong>Where does this go?</strong> Submitting writes one row to the SharePoint list
+            <code>DeviceExchangeRecords</code> on your site. Managers can view, filter, and export
+            all records from the SharePoint list directly — no additional tools needed.<br><br>
+            <strong>List columns created by the setup script:</strong>
+            Employee, DeviceType, Date, Tech, OldDevice, NewDevice, CheckinTime, PreExchangeTime,
+            ExchangeTime, CheckoutTime, TotalTime, Progress, Status, KeyApps, Notes, ChecklistJSON.
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-start; margin-top:4px;">
+        <button class="btn" onclick="showPanel(4)">← Back</button>
+      </div>
     </div>
-  </div>
-  <div class="section">
-    <div class="section-header">Summary</div>
-    <div class="summary-grid" id="summary-grid"></div>
-  </div>
-  <div class="sp-note">
-    <strong>SharePoint connected:</strong> Click Export to submit this form directly to your SharePoint list. Requires the form to be embedded in a SharePoint page (not opened locally).
-  </div>
+
+  </main>
 </div>
 
 <script>
-// SharePoint Configuration
-const SP_SITE_URL  = "https://quantaservices.sharepoint.com/sites/CEIDeviceExchange";
-const SP_LIST_NAME = "DeviceExchangeRecords";
-
-const CHECKLISTS = {
-  checkin: [
-    "Collect device information",
-    "Document synced SharePoint sites [N/A option]",
-    "Verify pre-cutover Powershell script C:\\Users\\NAME\\ migration report",
-    "Note installed printers (use notes section)",
-    "Note mapped network drives / folders [N/A option]",
-    "Verify Outlook PST archive files saved to OneDrive [N/A option]",
-    "Note any Outlook shared calendars / mailboxes [N/A option]",
-    "Export Outlook Classic rules and save to OneDrive [N/A option]",
-  ],
-  clerk: [
-    "Collect drop-off date / time",
-    "Collect user's name, account information, mobile number, password",
-    "Test CEI password",
-    "Device labeled with user's name",
-    "Power supply provided by user",
-    "Power supply labeled [N/A option]",
-    "Return accessories to user (USB dongles, mice, etc.)",
-    "Fill out additional notes field with any non-standard needs",
-  ],
-  emp_checkin: [
-    "Device password changed / recorded / tested",
-    "Phone number recorded",
-    "CEI email recorded",
-    "Quanta account usage recorded",
-    "Key applications / notes recorded",
-    "Power supply provided (Yes / No)",
-    "Accessories returned (dongles, etc.)",
-    "Informed of password sync",
-  ],
-  pre: [
-    "Request EBF email sent for each mobile device — iPhone [N/A option]",
-    "Request EBF email sent for each mobile device — iPad [N/A option]",
-    "Export OneNote notebooks as .onepkg to Desktop [N/A option]",
-    "Verify browser signed-in / synced: Chrome",
-    "Verify browser signed-in / synced: Edge",
-    "Export bookmarks and passwords (save to OneDrive) if not signed in",
-    "Verify OneDrive sync and backup is complete — NO ERRORS",
-    "Request OneDrive / mail migration (from site lead in Teams chat)",
-  ],
-  ex: [
-    "Log in as Quanta user (request QCO TAPS from site lead in Teams chat)",
-    "Verify primary user and group assignment (site lead required)",
-    "Check for Windows updates",
-    "Sign in to O365 apps with QCO account",
-    "Configure browser profiles (Chrome and/or Edge)",
-    "Create Quanta profile — desktop shortcut, orange theme, rename 'QCO Browser'",
-    "Create CEI profile — desktop shortcut, blue theme, rename 'CEI Browser'",
-    "Import bookmarks / favorites (needs user MFA) if no existing profiles",
-    "Import passwords if no existing profiles",
-    "Delete exported passwords file",
-    "Empty recycle bin",
-    "Confirm: Cisco AnyConnect VPN (all three profiles)",
-    "Confirm: Company Portal (Intune)",
-    "Confirm: CrowdStrike Windows Sensor",
-    "Confirm: CyberARK EPM Agent",
-    "Confirm: Egnyte",
-    "Confirm: PDQ Connect Agent",
-    "Confirm: PrinterLogic",
-    "Confirm: Qualys Cloud Agent",
-    "Confirm: Zscaler",
-    "Verify dept. specific apps installed (Field, BIM, Engineering)",
-    "Import OneNote .onepkg file [N/A option]",
-    "Install printers (PrinterLogic icon in task tray)",
-    "Verify VPN functionality (connect to VPN)",
-    "Verify mapped drive functionality",
-    "Verify Outlook functionality (set up new Outlook)",
-    "Verify Exclaimer email signature present in Outlook",
-    "Add offline archive PST to Outlook [N/A option]",
-    "Confirm Cirasync contact complete (site lead required)",
-    "Call or text user to notify device is ready for pickup",
-  ],
-  co: [
-    "Show user how to log in with native log in (key icon)",
-    "Have user change sign-in password and remove TAPs",
-    "Inform user of password sync: CEI → QCO",
-    "Set up MFA for QCO account in MS Authenticator — iPhone [N/A option]",
-    "Set up MFA for QCO account in MS Authenticator — iPad [N/A option]",
-    "Sign into Teams local app with CEI account",
-    "Sign into CEI browser with CEI account",
-    "Confirm camera and microphone are both working",
-    "Explain dual accounts in Teams (CEI and QCO)",
-    "Explain dual browsers for CEI and QCO accounts",
-    "Explain SharePoint sites accessible on the web",
-    "Test application access for user (use CEI credentials)",
-    "Test internal / external email",
-    "Explain Exclaimer signature for Outlook",
-    "Explain using Outlook Web (CEI) to see shared mailboxes / calendars",
-    "Explain changes to Outlook meeting invites",
-    "Inform user of Livewire migration info / status page",
-    "Open EBF email from 'MobileDeviceMigration' on user's mobile",
-    "Perform EBF Onboarder mobile migration steps — iPhone [N/A option]",
-    "Perform EBF Onboarder mobile migration steps — iPad [N/A option]",
-    "Inform user of IT support ticket via CEI Help Desk",
-    "Ask if user has any other questions; escalate if needed",
-    "Return devices to user",
-    "Obtain employee sign-off",
-  ],
-  emp_co: [
-    "Informed of password sync",
-    "Passwords changed",
-    "Dual browser usage explained",
-    "Dual account environment in Teams explained",
-    "Internal vs. external email explained / tested",
-    "VPN confirmed / tested",
-    "Application access tested",
-    "Employee informed of where to find support",
-    "Employee informed of LiveWire page",
-    "Employee received FAQ handout / link",
-    "MFA for QCO account activated",
-    "Confirm photos and files remain",
-  ],
+/* ═══════════════════════════════════════════════
+   CHECKLIST DATA
+═══════════════════════════════════════════════ */
+const LISTS = {
+  checkin: {
+    id: 'cl-checkin',
+    items: [
+      { t: "Collect device information" },
+      { t: "Document synced SharePoint sites", na: true },
+      { t: "Verify pre-cutover Powershell script (C:\\Users\\NAME\\migration report)" },
+      { t: "Note installed printers (use notes section)" },
+      { t: "Note mapped network drives / folders", na: true },
+      { t: "Verify Outlook PST archive files saved to OneDrive", na: true },
+      { t: "Note any Outlook shared calendars / mailboxes", na: true },
+      { t: "Export Outlook Classic rules and save to OneDrive", na: true },
+    ]
+  },
+  clerk: {
+    id: 'cl-clerk',
+    items: [
+      { t: "Collect drop-off date / time" },
+      { t: "Collect user's name, account info, mobile number, password" },
+      { t: "Test CEI password" },
+      { t: "Device labeled with user's name" },
+      { t: "Power supply provided by user" },
+      { t: "Power supply labeled", na: true },
+      { t: "Return accessories to user (USB dongles, mice, etc.)" },
+      { t: "Fill out additional notes field with any non-standard needs" },
+    ]
+  },
+  'emp-ci': {
+    id: 'cl-emp-ci',
+    items: [
+      { t: "Device password changed / recorded / tested" },
+      { t: "Phone number recorded" },
+      { t: "CEI email recorded" },
+      { t: "Quanta account usage recorded" },
+      { t: "Key applications / notes recorded" },
+      { t: "Power supply provided (Yes / No)" },
+      { t: "Accessories returned (dongles, etc.)" },
+      { t: "Informed of password sync" },
+    ]
+  },
+  pre: {
+    id: 'cl-pre',
+    items: [
+      { t: "Request EBF email sent — iPhone", na: true },
+      { t: "Request EBF email sent — iPad", na: true },
+      { t: "Export OneNote notebooks as .onepkg to Desktop", na: true },
+      { t: "Verify browser signed-in / synced: Chrome" },
+      { t: "Verify browser signed-in / synced: Edge" },
+      { t: "Export bookmarks and passwords (save to OneDrive) if not signed in" },
+      { t: "Verify OneDrive sync and backup complete — NO ERRORS" },
+      { t: "Request OneDrive / mail migration (from site lead in Teams)" },
+    ]
+  },
+  ex: {
+    id: 'cl-ex',
+    items: [
+      { t: "Log in as Quanta user — request QCO TAPS from site lead", sl: true },
+      { t: "Verify primary user and group assignment", sl: true },
+      { t: "Check for Windows updates" },
+      { t: "Sign in to O365 apps with QCO account" },
+      { t: "Configure browser profiles (Chrome and/or Edge)" },
+      { t: "Create Quanta profile: desktop shortcut, orange theme → rename 'QCO Browser'" },
+      { t: "Create CEI profile: desktop shortcut, blue theme → rename 'CEI Browser'" },
+      { t: "Import bookmarks / favorites (needs user MFA) if no existing profiles" },
+      { t: "Import passwords if no existing profiles" },
+      { t: "Delete exported passwords file" },
+      { t: "Empty recycle bin" },
+      { t: "Confirm: Cisco AnyConnect VPN (all three profiles)" },
+      { t: "Confirm: Company Portal (Intune)" },
+      { t: "Confirm: CrowdStrike Windows Sensor" },
+      { t: "Confirm: CyberARK EPM Agent" },
+      { t: "Confirm: Egnyte" },
+      { t: "Confirm: PDQ Connect Agent" },
+      { t: "Confirm: PrinterLogic" },
+      { t: "Confirm: Qualys Cloud Agent" },
+      { t: "Confirm: Zscaler" },
+      { t: "Verify dept. specific apps installed (Field, BIM, Engineering)" },
+      { t: "Import OneNote .onepkg file", na: true },
+      { t: "Install printers (PrinterLogic icon in task tray)" },
+      { t: "Verify VPN functionality (connect to VPN)" },
+      { t: "Verify mapped drive functionality" },
+      { t: "Verify Outlook functionality (set up new Outlook)" },
+      { t: "Verify Exclaimer email signature present in Outlook" },
+      { t: "Add offline archive PST to Outlook", na: true },
+      { t: "Confirm Cirasync contact complete", sl: true },
+      { t: "Call or text user — notify device is ready for pickup" },
+    ]
+  },
+  co: {
+    id: 'cl-co',
+    items: [
+      { t: "Show user how to log in with native log in (key icon)" },
+      { t: "Have user change sign-in password and remove TAPs" },
+      { t: "Inform user of password sync: CEI → QCO" },
+      { t: "Set up MFA for QCO account in MS Authenticator — iPhone", na: true },
+      { t: "Set up MFA for QCO account in MS Authenticator — iPad", na: true },
+      { t: "Sign into Teams local app with CEI account" },
+      { t: "Sign into CEI browser with CEI account" },
+      { t: "Confirm camera and microphone working" },
+      { t: "Explain dual accounts in Teams (CEI and QCO)" },
+      { t: "Explain dual browsers for CEI and QCO accounts" },
+      { t: "Explain SharePoint sites accessible on the web" },
+      { t: "Test application access with CEI credentials" },
+      { t: "Test internal / external email" },
+      { t: "Explain Exclaimer signature for Outlook" },
+      { t: "Explain Outlook Web (CEI) for shared mailboxes / calendars" },
+      { t: "Explain changes to Outlook meeting invites" },
+      { t: "Inform user of Livewire migration info / status page" },
+      { t: "Open EBF email from 'MobileDeviceMigration' on user's mobile" },
+      { t: "Perform EBF Onboarder mobile migration — iPhone", na: true },
+      { t: "Perform EBF Onboarder mobile migration — iPad", na: true },
+      { t: "Inform user of IT support ticket via CEI Help Desk" },
+      { t: "Ask if user has any other questions; escalate if needed" },
+      { t: "Return devices to user" },
+      { t: "Obtain employee sign-off" },
+    ]
+  },
+  'emp-co': {
+    id: 'cl-emp-co',
+    items: [
+      { t: "Informed of password sync" },
+      { t: "Passwords changed" },
+      { t: "Dual browser usage explained" },
+      { t: "Dual account environment in Teams explained" },
+      { t: "Internal vs. external email explained / tested" },
+      { t: "VPN confirmed / tested" },
+      { t: "Application access tested" },
+      { t: "Employee informed of where to find support" },
+      { t: "Employee informed of LiveWire page" },
+      { t: "Employee received FAQ handout / link" },
+      { t: "MFA for QCO account activated" },
+      { t: "Confirm photos and files remain" },
+    ]
+  }
 };
 
-const NAOptional = new Set([
-  "Document synced SharePoint sites [N/A option]",
-  "Note mapped network drives / folders [N/A option]",
-  "Verify Outlook PST archive files saved to OneDrive [N/A option]",
-  "Note any Outlook shared calendars / mailboxes [N/A option]",
-  "Export Outlook Classic rules and save to OneDrive [N/A option]",
-  "Power supply labeled [N/A option]",
-  "Request EBF email sent for each mobile device — iPhone [N/A option]",
-  "Request EBF email sent for each mobile device — iPad [N/A option]",
-  "Export OneNote notebooks as .onepkg to Desktop [N/A option]",
-  "Import OneNote .onepkg file [N/A option]",
-  "Add offline archive PST to Outlook [N/A option]",
-  "Set up MFA for QCO account in MS Authenticator — iPhone [N/A option]",
-  "Set up MFA for QCO account in MS Authenticator — iPad [N/A option]",
-  "Perform EBF Onboarder mobile migration steps — iPhone [N/A option]",
-  "Perform EBF Onboarder mobile migration steps — iPad [N/A option]",
-]);
-
-const cleanLabel = l => l.replace(/ \[N\/A option\]/g, '');
-
-const state = { checked: {}, na: {} };
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+const checked = {}, naState = {};
 const timers = { ci: null, pre: null, ex: null, co: null };
 const elapsed = { ci: 0, pre: 0, ex: 0, co: 0 };
-const startTimes = { ci: null, pre: null, ex: null, co: null };
+const starts  = { ci: null, pre: null, ex: null, co: null };
+const devices = new Set();
+const apps    = new Set();
 
-function buildChecklist(containerId, items) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  el.innerHTML = '';
-  items.forEach((item, i) => {
-    const id = containerId + '_' + i;
-    const hasNA = NAOptional.has(item);
-    const label = cleanLabel(item);
-    const row = document.createElement('div');
-    row.className = 'check-item';
-    row.id = 'row_' + id;
-    row.innerHTML = `<input type="checkbox" id="cb_${id}" onchange="toggleCheck('${id}','${containerId}','${i}')">
-      <span class="check-label">${label}</span>
-      ${hasNA ? `<button class="check-na" id="na_${id}" onclick="toggleNA('${id}','${containerId}','${i}')">N/A</button>` : ''}`;
-    el.appendChild(row);
+/* ═══════════════════════════════════════════════
+   BUILD CHECKLISTS
+═══════════════════════════════════════════════ */
+function buildAll() {
+  Object.entries(LISTS).forEach(([key, cfg]) => {
+    const el = document.getElementById(cfg.id);
+    if (!el) return;
+    el.innerHTML = '';
+    cfg.items.forEach((item, i) => {
+      const id = key + '_' + i;
+      const row = document.createElement('div');
+      row.className = 'check-row';
+      row.id = 'row_' + id;
+      row.innerHTML =
+        `<input type="checkbox" id="cb_${id}" onchange="onCheck('${id}')">` +
+        (item.sl ? `<span class="sl-tag">SL</span>` : '') +
+        `<label for="cb_${id}" class="cl">${item.t}</label>` +
+        (item.na ? `<button class="na-btn" id="na_${id}" onclick="onNA('${id}')">N/A</button>` : '');
+      el.appendChild(row);
+    });
   });
 }
 
-function toggleCheck(id, cid, idx) {
-  const cb = document.getElementById('cb_' + id);
+/* ═══════════════════════════════════════════════
+   CHECK / NA
+═══════════════════════════════════════════════ */
+function onCheck(id) {
+  const cb  = document.getElementById('cb_' + id);
   const row = document.getElementById('row_' + id);
-  state.checked[id] = cb.checked;
+  checked[id] = cb.checked;
   row.classList.toggle('done', cb.checked);
-  if (cb.checked) { state.na[id] = false; const nb = document.getElementById('na_' + id); if (nb) nb.classList.remove('active'); row.classList.remove('na'); }
-  updateProgress();
+  if (cb.checked) { naState[id] = false; const nb = document.getElementById('na_' + id); if(nb) nb.classList.remove('on'); row.classList.remove('is-na'); }
+  refresh();
 }
-
-function toggleNA(id, cid, idx) {
-  const nb = document.getElementById('na_' + id);
-  const cb = document.getElementById('cb_' + id);
+function onNA(id) {
+  const nb  = document.getElementById('na_' + id);
+  const cb  = document.getElementById('cb_' + id);
   const row = document.getElementById('row_' + id);
-  state.na[id] = !state.na[id];
-  nb.classList.toggle('active', state.na[id]);
-  row.classList.toggle('na', state.na[id]);
-  if (state.na[id]) { cb.checked = false; state.checked[id] = false; row.classList.remove('done'); }
-  updateProgress();
+  naState[id] = !naState[id];
+  nb.classList.toggle('on', naState[id]);
+  row.classList.toggle('is-na', naState[id]);
+  if (naState[id]) { cb.checked = false; checked[id] = false; row.classList.remove('done'); }
+  refresh();
 }
 
-function getAllItems() {
-  let items = [];
-  Object.keys(CHECKLISTS).forEach(k => {
-    CHECKLISTS[k].forEach((item, i) => {
-      const id = 'cl_' + k + '_' + i;
-      items.push(id);
-    });
-  });
-  return items;
+/* ═══════════════════════════════════════════════
+   TOGGLES
+═══════════════════════════════════════════════ */
+function togDevice(btn, name) {
+  btn.classList.toggle('on');
+  devices.has(name) ? devices.delete(name) : devices.add(name);
+}
+function togApp(btn) {
+  btn.classList.toggle('on');
+  const name = btn.textContent.trim();
+  apps.has(name) ? apps.delete(name) : apps.add(name);
 }
 
-function countDone() {
-  let total = 0, done = 0;
-  Object.keys(CHECKLISTS).forEach(k => {
-    const cid = getContainerId(k);
-    CHECKLISTS[k].forEach((item, i) => {
-      const id = cid + '_' + i;
-      total++;
-      if (state.checked[id] || state.na[id]) done++;
-    });
-  });
-  return { total, done };
-}
-
-function getContainerId(k) {
-  return { checkin:'cl-checkin', clerk:'cl-clerk', emp_checkin:'cl-emp-checkin', pre:'cl-pre', ex:'cl-ex', co:'cl-co', emp_co:'cl-emp-co' }[k];
-}
-
-function updateProgress() {
-  const { total, done } = countDone();
-  const pct = total ? Math.round(done / total * 100) : 0;
-  document.getElementById('overall-bar').style.width = pct + '%';
-  document.getElementById('overall-pct').textContent = done + ' / ' + total + ' complete';
-  const badge = document.getElementById('status-badge');
-  if (pct === 100) { badge.textContent = 'Complete'; badge.style.background = 'var(--color-background-success)'; badge.style.color = 'var(--color-text-success)'; }
-  else { badge.textContent = 'In progress'; badge.style.background = 'var(--color-background-info)'; badge.style.color = 'var(--color-text-info)'; }
-  updateSummary();
-}
-
-function showTab(idx, btn) {
-  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i === idx));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  if (idx === 5) updateSummary();
-}
-
-function toggleDevice(btn, name) { btn.classList.toggle('on'); }
-function toggleApp(btn) { btn.classList.toggle('on'); }
-
-function syncName() {
-  const v = document.getElementById('emp-name').value;
-  const so = document.getElementById('emp-signoff');
-  if (so && !so._touched) so.placeholder = v || 'Employee name (print/sign)';
-}
-
-function fmtTime(s) {
+/* ═══════════════════════════════════════════════
+   TIMERS
+═══════════════════════════════════════════════ */
+function fmt(s) {
   const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
   return h+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
 }
-
-function getTotalElapsed() {
-  let t = 0;
-  Object.keys(elapsed).forEach(k => {
-    t += elapsed[k];
-    if (timers[k] && startTimes[k]) t += Math.floor((Date.now() - startTimes[k]) / 1000);
-  });
-  return t;
+function totalSec() {
+  return Object.keys(elapsed).reduce((a,k) => {
+    let v = elapsed[k];
+    if (starts[k]) v += Math.floor((Date.now()-starts[k])/1000);
+    return a+v;
+  }, 0);
 }
-
 function toggleTimer(key) {
-  const btn = document.getElementById('btn-' + key);
+  const btn = document.getElementById('tbtn-' + key);
   if (timers[key]) {
-    elapsed[key] += Math.floor((Date.now() - startTimes[key]) / 1000);
+    elapsed[key] += Math.floor((Date.now()-starts[key])/1000);
     clearInterval(timers[key]);
-    timers[key] = null;
-    startTimes[key] = null;
-    btn.textContent = 'Resume timer';
-    btn.classList.remove('running');
+    timers[key] = null; starts[key] = null;
+    btn.textContent = '▶ Resume'; btn.classList.remove('running');
   } else {
-    startTimes[key] = Date.now();
-    btn.classList.add('running');
-    btn.textContent = 'Stop timer';
+    starts[key] = Date.now();
+    btn.textContent = '⏹ Stop'; btn.classList.add('running');
     timers[key] = setInterval(() => {
-      const sec = elapsed[key] + Math.floor((Date.now() - startTimes[key]) / 1000);
-      document.getElementById('disp-' + key).textContent = fmtTime(sec);
-      document.getElementById('total-time-display').textContent = fmtTime(getTotalElapsed()) + ' total';
-      document.getElementById('total-time-final').textContent = 'Total: ' + fmtTime(getTotalElapsed());
+      const s = elapsed[key] + Math.floor((Date.now()-starts[key])/1000);
+      document.getElementById('tdisp-'+key).textContent = fmt(s);
+      document.getElementById('total-clock').textContent = fmt(totalSec());
     }, 1000);
   }
 }
 
-function updateSummary() {
-  const { total, done } = countDone();
-  const pct = total ? Math.round(done / total * 100) : 0;
-  const total_t = getTotalElapsed();
-  const sg = document.getElementById('summary-grid');
-  if (!sg) return;
-  sg.innerHTML = `
-    <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value">${done}</div><div class="stat-sub">of ${total} items</div></div>
-    <div class="stat-card"><div class="stat-label">Progress</div><div class="stat-value">${pct}%</div><div class="stat-sub">overall</div></div>
-    <div class="stat-card"><div class="stat-label">Check-in time</div><div class="stat-value">${fmtTime(elapsed.ci)}</div></div>
-    <div class="stat-card"><div class="stat-label">Pre-exchange</div><div class="stat-value">${fmtTime(elapsed.pre)}</div></div>
-    <div class="stat-card"><div class="stat-label">Exchange</div><div class="stat-value">${fmtTime(elapsed.ex)}</div></div>
-    <div class="stat-card"><div class="stat-label">Check-out</div><div class="stat-value">${fmtTime(elapsed.co)}</div></div>
-    <div class="stat-card"><div class="stat-label">Total time</div><div class="stat-value">${fmtTime(total_t)}</div></div>
+/* ═══════════════════════════════════════════════
+   PANEL NAV
+═══════════════════════════════════════════════ */
+function showPanel(idx) {
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('active', i===idx));
+  if (idx===5) buildSummary();
+}
+
+/* ═══════════════════════════════════════════════
+   PROGRESS
+═══════════════════════════════════════════════ */
+function countAll() {
+  let total=0, done=0;
+  Object.keys(LISTS).forEach(key => {
+    LISTS[key].items.forEach((_,i) => {
+      const id = key+'_'+i; total++;
+      if (checked[id]||naState[id]) done++;
+    });
+  });
+  return {total,done};
+}
+function countGroup(key) {
+  let total=0,done=0;
+  LISTS[key].items.forEach((_,i) => {
+    const id=key+'_'+i; total++;
+    if (checked[id]||naState[id]) done++;
+  });
+  return {total,done};
+}
+
+// Map panels to list groups
+const PANEL_GROUPS = [
+  [],
+  ['checkin','clerk','emp-ci'],
+  ['pre'],
+  ['ex'],
+  ['co'],
+  ['emp-co']
+];
+function refresh() {
+  const {total,done} = countAll();
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = done+' / '+total+' complete';
+  const chip = document.getElementById('status-chip');
+  chip.textContent = pct===100 ? '✓ Complete' : 'In progress';
+  chip.className = 'status-chip' + (pct===100 ? ' complete' : '');
+  // Nav percentages
+  PANEL_GROUPS.forEach((groups,i) => {
+    if (!groups.length) { document.getElementById('npct-'+i).textContent=''; return; }
+    let t=0,d=0;
+    groups.forEach(g => { const r=countGroup(g); t+=r.total; d+=r.done; });
+    document.getElementById('npct-'+i).textContent = t ? Math.round(d/t*100)+'%' : '';
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   SUMMARY
+═══════════════════════════════════════════════ */
+function buildSummary() {
+  const {total,done} = countAll();
+  const pct = total ? Math.round(done/total*100) : 0;
+  const ciS  = elapsed.ci  + (starts.ci  ? Math.floor((Date.now()-starts.ci)/1000)  : 0);
+  const preS = elapsed.pre + (starts.pre ? Math.floor((Date.now()-starts.pre)/1000) : 0);
+  const exS  = elapsed.ex  + (starts.ex  ? Math.floor((Date.now()-starts.ex)/1000)  : 0);
+  const coS  = elapsed.co  + (starts.co  ? Math.floor((Date.now()-starts.co)/1000)  : 0);
+  const tot  = ciS+preS+exS+coS;
+  document.getElementById('summary-stats').innerHTML = `
+    <div class="stat"><div class="s-label">Complete</div><div class="s-val">${done}</div><div class="s-sub">of ${total} items</div></div>
+    <div class="stat"><div class="s-label">Progress</div><div class="s-val">${pct}%</div></div>
+    <div class="stat"><div class="s-label">Check-in</div><div class="s-val" style="font-size:15px">${fmt(ciS)}</div></div>
+    <div class="stat"><div class="s-label">Pre-exchange</div><div class="s-val" style="font-size:15px">${fmt(preS)}</div></div>
+    <div class="stat"><div class="s-label">Exchange</div><div class="s-val" style="font-size:15px">${fmt(exS)}</div></div>
+    <div class="stat"><div class="s-label">Check-out</div><div class="s-val" style="font-size:15px">${fmt(coS)}</div></div>
+    <div class="stat"><div class="s-label">Total time</div><div class="s-val" style="font-size:15px">${fmt(tot)}</div></div>
   `;
+  document.getElementById('total-time-final') && (document.getElementById('total-time-final').textContent = 'Total: '+fmt(tot));
 }
 
-function completeForm() {
-  document.getElementById('emp-signoff')._touched = true;
-  alert('Checklist marked as complete! Use Export to save this record.');
-}
-
-function exportData() {
-  const btn = document.querySelector('button[onclick="exportData()"]');
-  const originalText = btn.textContent;
-  btn.textContent = 'Submitting...';
-  btn.disabled = true;
-
-  const fields = {};
-  ['emp-name','appt-time','date-recv','time-recv','mob-num','pers-phone','mob-serial','cei-user','cei-upn','cei-email','q-email','mig-site','quanta-acct','temp-pw','old-model','old-serial','old-host','new-model','new-serial','new-host','tab-name','tab-serial','tab-model','recv-tech','add-notes','tech-checkin','tech-pre','tech-ex','tech-co','tech-signoff','emp-signoff'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) fields[id] = el.value;
+/* ═══════════════════════════════════════════════
+   COLLECT FORM DATA
+═══════════════════════════════════════════════ */
+function gv(id) { const el=document.getElementById(id); return el ? el.value : ''; }
+function collectData() {
+  const ciS  = elapsed.ci  + (starts.ci  ? Math.floor((Date.now()-starts.ci)/1000)  : 0);
+  const preS = elapsed.pre + (starts.pre ? Math.floor((Date.now()-starts.pre)/1000) : 0);
+  const exS  = elapsed.ex  + (starts.ex  ? Math.floor((Date.now()-starts.ex)/1000)  : 0);
+  const coS  = elapsed.co  + (starts.co  ? Math.floor((Date.now()-starts.co)/1000)  : 0);
+  const checklistSnap = {};
+  Object.keys(LISTS).forEach(k => {
+    checklistSnap[k] = LISTS[k].items.map((item,i) => {
+      const id=k+'_'+i;
+      return { item: item.t, checked: !!checked[id], na: !!naState[id] };
+    });
   });
-  const { total, done } = countDone();
-  const selectedDevices = Array.from(document.querySelectorAll('.device-toggle.on')).map(el => el.textContent).join(', ');
-  const selectedApps = Array.from(document.querySelectorAll('#key-apps .device-toggle.on')).map(el => el.textContent).join(', ');
-
-  const listItemData = {
-    'Title': fields['emp-name'] || 'Device Exchange',
-    'DeviceType': selectedDevices || 'Not specified',
-    'DateReceived': fields['date-recv'] ? new Date(fields['date-recv']).toISOString() : null,
-    'EmployeeName': fields['emp-name'],
-    'CEIUsername': fields['cei-user'],
-    'CEIEmail': fields['cei-email'],
-    'QuantaEmail': fields['q-email'],
-    'MigrationSite': fields['mig-site'],
-    'UsingQuantaAccount': fields['quanta-acct'],
-    'OldDevice': fields['old-model'],
-    'NewDevice': fields['new-model'],
-    'KeyApplications': selectedApps || fields['other-apps'],
-    'AdditionalNotes': fields['add-notes'],
-    'ItemsCompleted': done,
-    'ItemsTotal': total,
-    'ProgressPercentage': total ? Math.round(done/total*100) : 0,
-    'Status': done === total ? 'Complete' : 'In Progress',
-    'TotalTimeSeconds': getTotalElapsed(),
-    'FormVersion': '1.0',
-    'SubmittedAt': new Date().toISOString(),
-    'TechCheckin': fields['tech-checkin'],
-    'TechPreExchange': fields['tech-pre'],
-    'TechExchange': fields['tech-ex'],
-    'TechCheckout': fields['tech-co'],
-    'TechSignoff': fields['tech-signoff'],
-    'EmployeeSignoff': fields['emp-signoff'],
+  const {total,done} = countAll();
+  return {
+    Title:           gv('f-emp-name') || '(no name)',
+    EmployeeName:    gv('f-emp-name'),
+    DeviceType:      [...devices].join(', '),
+    AppointmentTime: gv('f-appt'),
+    DateReceived:    gv('f-date-recv') || new Date().toISOString().slice(0,10),
+    TimeReceived:    gv('f-time-recv'),
+    CEIUsername:     gv('f-cei-user'),
+    CEIUPN:          gv('f-cei-upn'),
+    CEIEmail:        gv('f-cei-email'),
+    QuantaEmail:     gv('f-q-email'),
+    UsingQuantaAcct: gv('f-quanta-acct'),
+    TempPassword:    gv('f-temp-pw'),
+    MigrationSite:   gv('f-mig-site'),
+    ReceivedByTech:  gv('f-recv-tech'),
+    MobileNumber:    gv('f-mob-num'),
+    MobileSerial:    gv('f-mob-serial'),
+    PersonalPhone:   gv('f-pers-phone'),
+    OldDeviceModel:  gv('f-old-model'),
+    OldDeviceSerial: gv('f-old-serial'),
+    OldDeviceHost:   gv('f-old-host'),
+    NewDeviceModel:  gv('f-new-model'),
+    NewDeviceSerial: gv('f-new-serial'),
+    NewDeviceHost:   gv('f-new-host'),
+    TabletName:      gv('f-tab-name'),
+    TabletSerial:    gv('f-tab-serial'),
+    TabletModel:     gv('f-tab-model'),
+    KeyApplications: [...apps].join(', ') + (gv('f-other-apps') ? ', '+gv('f-other-apps') : ''),
+    AdditionalNotes: gv('f-notes'),
+    TechCheckin:     gv('t-tech-ci'),
+    TechPreExchange: gv('t-tech-pre'),
+    TechExchange:    gv('t-tech-ex'),
+    TechCheckout:    gv('t-tech-co'),
+    TechSignoff:     gv('f-tech-signoff'),
+    EmployeeSignoff: gv('f-emp-signoff'),
+    CheckinTimeSec:  ciS,
+    PreExchangeTimeSec: preS,
+    ExchangeTimeSec: exS,
+    CheckoutTimeSec: coS,
+    TotalTimeSec:    ciS+preS+exS+coS,
+    CheckinTime:     fmt(ciS),
+    PreExchangeTime: fmt(preS),
+    ExchangeTime:    fmt(exS),
+    CheckoutTime:    fmt(coS),
+    TotalTime:       fmt(ciS+preS+exS+coS),
+    ItemsDone:       done,
+    ItemsTotal:      total,
+    ProgressPct:     total ? Math.round(done/total*100) : 0,
+    Status:          done===total ? 'Complete' : 'In Progress',
+    FormVersion:     APP_VERSION,
+    SubmittedAt:     new Date().toISOString(),
+    ChecklistJSON:   JSON.stringify(checklistSnap),
   };
-
-  const endpoint = `${SP_SITE_URL}/_api/web/lists/getByTitle('${SP_LIST_NAME}')/items`;
-
-  fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'X-RequestDigest': document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : ''
-    },
-    body: JSON.stringify(listItemData)
-  })
-  .then(response => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-  })
-  .then(data => {
-    alert('✓ Submitted to SharePoint! Item ID: ' + data.Id);
-    btn.textContent = originalText;
-    btn.disabled = false;
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error submitting to SharePoint:\n' + error.message + '\n\nNote: Ensure this form is embedded in a SharePoint page, not opened locally.');
-    btn.textContent = originalText;
-    btn.disabled = false;
-  });
 }
 
-buildChecklist('cl-checkin', CHECKLISTS.checkin);
-buildChecklist('cl-clerk', CHECKLISTS.clerk);
-buildChecklist('cl-emp-checkin', CHECKLISTS.emp_checkin);
-buildChecklist('cl-pre', CHECKLISTS.pre);
-buildChecklist('cl-ex', CHECKLISTS.ex);
-buildChecklist('cl-co', CHECKLISTS.co);
-buildChecklist('cl-emp-co', CHECKLISTS.emp_co);
-updateProgress();
-updateSummary();
-document.getElementById('date-recv').valueAsDate = new Date();
+/* ═══════════════════════════════════════════════
+   SUBMIT TO SHAREPOINT
+═══════════════════════════════════════════════ */
+async function submitToSharePoint() {
+  const btn = document.getElementById('submit-btn');
+  const status = document.getElementById('submit-status');
+
+  if (!SP_SITE_URL || SP_SITE_URL.includes('YOURTENANT')) {
+    status.className = 'submit-status error';
+    status.textContent = '⚠ Please configure SP_SITE_URL at the top of this file before submitting.';
+    return;
+  }
+
+  btn.disabled = true;
+  status.className = 'submit-status loading';
+  status.textContent = '⏳ Submitting to SharePoint…';
+
+  const data = collectData();
+
+  // SharePoint REST API uses the logged-in user's session cookie automatically
+  // when the file is served from the same SharePoint domain.
+  try {
+    // 1) Get request digest (CSRF token) for SharePoint REST
+    const ctxResp = await fetch(
+      SP_SITE_URL + "/_api/contextinfo",
+      { method: 'POST', headers: { Accept: 'application/json;odata=verbose' }, credentials: 'include' }
+    );
+    if (!ctxResp.ok) throw new Error('Could not get context info — are you logged into SharePoint?');
+    const ctx = await ctxResp.json();
+    const digest = ctx.d.GetContextWebInformation.FormDigestValue;
+
+    // 2) Post list item
+    const fields = {
+      __metadata: { type: `SP.Data.${SP_LIST_NAME}ListItem` },
+      Title:              data.EmployeeName || '(no name)',
+      EmployeeName:       data.EmployeeName,
+      DeviceType:         data.DeviceType,
+      DateReceived:       data.DateReceived,
+      MigrationSite:      data.MigrationSite,
+      CEIUsername:        data.CEIUsername,
+      CEIEmail:           data.CEIEmail,
+      QuantaEmail:        data.QuantaEmail,
+      OldDevice:          data.OldDeviceModel + ' / ' + data.OldDeviceSerial,
+      NewDevice:          data.NewDeviceModel + ' / ' + data.NewDeviceSerial,
+      ReceivedByTech:     data.ReceivedByTech,
+      TechSignoff:        data.TechSignoff,
+      EmployeeSignoff:    data.EmployeeSignoff,
+      KeyApplications:    data.KeyApplications,
+      AdditionalNotes:    data.AdditionalNotes,
+      CheckinTime:        data.CheckinTime,
+      PreExchangeTime:    data.PreExchangeTime,
+      ExchangeTime:       data.ExchangeTime,
+      CheckoutTime:       data.CheckoutTime,
+      TotalTime:          data.TotalTime,
+      TotalTimeSec:       data.TotalTimeSec,
+      ItemsDone:          data.ItemsDone,
+      ItemsTotal:         data.ItemsTotal,
+      ProgressPct:        data.ProgressPct,
+      Status:             data.Status,
+      FormVersion:        data.FormVersion,
+      SubmittedAt:        data.SubmittedAt,
+      ChecklistJSON:      data.ChecklistJSON,
+    };
+
+    const resp = await fetch(
+      SP_SITE_URL + `/_api/web/lists/getbytitle('${SP_LIST_NAME}')/items`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Accept':          'application/json;odata=verbose',
+          'Content-Type':    'application/json;odata=verbose',
+          'X-RequestDigest': digest,
+        },
+        body: JSON.stringify(fields),
+      }
+    );
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message?.value || `HTTP ${resp.status}`);
+    }
+
+    const result = await resp.json();
+    status.className = 'submit-status success';
+    status.textContent = '✓ Submitted successfully! Record ID: ' + result.d.Id + ' — ' + data.EmployeeName + ' · ' + data.TotalTime;
+    btn.textContent = '✓ Submitted';
+
+  } catch(e) {
+    status.className = 'submit-status error';
+    status.textContent = '✗ Submission failed: ' + e.message;
+    btn.disabled = false;
+    btn.textContent = '↺ Retry Submit';
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   EXPORT JSON
+═══════════════════════════════════════════════ */
+function exportJSON() {
+  const data = collectData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'device-exchange-' + (data.EmployeeName||'record').replace(/\s+/g,'-') + '-' + data.DateReceived + '.json';
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════
+   SIGN-OFF AUTOFILL
+═══════════════════════════════════════════════ */
+function autoFillSignoff() {
+  const v = document.getElementById('f-emp-name').value;
+  const s = document.getElementById('f-emp-signoff');
+  if (s && !s._userEdited) s.placeholder = v || 'Employee name';
+}
+document.addEventListener('input', e => {
+  if (e.target.id === 'f-emp-signoff') e.target._userEdited = true;
+});
+
+/* ═══════════════════════════════════════════════
+   LOAD USER FROM SP
+═══════════════════════════════════════════════ */
+async function loadUser() {
+  try {
+    const r = await fetch(SP_SITE_URL + '/_api/web/currentuser', {
+      credentials: 'include',
+      headers: { Accept: 'application/json;odata=verbose' }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      document.getElementById('user-display').textContent = d.d.Title || d.d.Email || 'Logged in';
+    }
+  } catch(e) {
+    document.getElementById('user-display').textContent = 'SharePoint user';
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+buildAll();
+refresh();
+document.getElementById('f-date-recv').valueAsDate = new Date();
+
+if (SP_SITE_URL.includes('YOURTENANT')) {
+  document.getElementById('config-banner').classList.add('show');
+} else {
+  loadUser();
+}
 </script>
+
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║  SETUP INSTRUCTIONS                                                  ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  STEP 1 — Edit the two config lines at the top of <script>:          ║
+║    SP_SITE_URL  = your SharePoint site URL                           ║
+║    SP_LIST_NAME = name of the list (default: DeviceExchangeRecords)  ║
+║                                                                      ║
+║  STEP 2 — Create the SharePoint site:                                ║
+║    SharePoint Admin Center → Active sites → + Create                 ║
+║    Choose "Communication site"                                       ║
+║    Name: CEI Device Exchange                                         ║
+║    URL: .../sites/CEIDeviceExchange                                  ║
+║                                                                      ║
+║  STEP 3 — Run the PnP PowerShell list-creation script                ║
+║    (see companion file: setup-sharepoint-list.ps1)                   ║
+║                                                                      ║
+║  STEP 4 — Upload this file to the site's Site Assets library:        ║
+║    Site Contents → Site Assets → Upload                              ║
+║    File: cei-device-exchange-form.html                               ║
+║                                                                      ║
+║  STEP 5 — Add to a SharePoint page:                                  ║
+║    Edit a page → + Add web part → Embed                              ║
+║    Paste the URL of the uploaded HTML file                           ║
+║    (or use Script Editor web part for legacy pages)                  ║
+║                                                                      ║
+║  STEP 6 — Set permissions:                                           ║
+║    Techs: Contribute (can submit new items)                          ║
+║    Managers: Read site + Full Control on list view                   ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
+</body>
+</html>
