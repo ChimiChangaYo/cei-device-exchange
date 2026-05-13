@@ -702,6 +702,7 @@ function collectData(stage){
     EmployeeSignoff: userInfo.EmployeeSignoff,
     KeyApplications: userInfo.KeyApplications,
     AdditionalNotes: userInfo.AdditionalNotes,
+    DateReceived:    userInfo.DateReceived,
     CheckinTime:     fmt(ciS),
     PreExchangeTime: fmt(preS),
     ExchangeTime:    fmt(exS),
@@ -832,7 +833,7 @@ function loadRecord(item) {
     try {
       const snap = JSON.parse(item.ChecklistDetail);
       Object.keys(snap).forEach(k => {
-        snap[k].forEach((entry, i) => {
+        snap[k].forEach((entry, i) => {type
           const id = k+'_'+i;
           const cb = document.getElementById('cb_'+id);
           const nb = document.getElementById('na_'+id);
