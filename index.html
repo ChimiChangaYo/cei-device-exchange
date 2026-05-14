@@ -305,6 +305,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
             <button class="tog" onclick="togApp(this)">Adobe</button>
           </div>
           <div class="field" style="margin-top:12px;"><label>Other applications</label><input type="text" id="f-other-apps" placeholder="List additional apps…"></div>
+          <div class="field" style="margin-top:12px;"><label>Shared mailboxes</label><textarea id="f-shared-mailboxes" placeholder="List shared mailboxes, one per line…"></textarea></div>
+          <div class="field" style="margin-top:12px;"><label>Shared calendars</label><textarea id="f-shared-calendars" placeholder="List shared calendars, one per line…"></textarea></div>
         </div>
       </div>
       <div class="card">
@@ -681,6 +683,8 @@ function collectData(stage){
     KeyApplications: [...apps].join(', ')+(gv('f-other-apps')?', '+gv('f-other-apps'):''),
     OtherApps:       gv('f-other-apps'),
     AdditionalNotes: gv('f-notes'),
+    SharedMailboxes: gv('f-shared-mailboxes'),
+    SharedCalendars: gv('f-shared-calendars'),
     DeviceType:      [...devices].join(', '),
     TechCheckin:     gv('t-tech-ci'),
     TechPreExchange: gv('t-tech-pre'),
@@ -702,6 +706,8 @@ function collectData(stage){
     EmployeeSignoff: userInfo.EmployeeSignoff,
     KeyApplications: userInfo.KeyApplications,
     AdditionalNotes: userInfo.AdditionalNotes,
+    SharedMailboxes: userInfo.SharedMailboxes,
+    SharedCalendars: userInfo.SharedCalendars,
     DateReceived:    userInfo.DateReceived,
     CheckinTime:     fmt(ciS),
     PreExchangeTime: fmt(preS),
@@ -872,6 +878,8 @@ function loadRecord(item) {
   set('f-tab-serial',  ui.TabletSerial);
   set('f-tab-model',   ui.TabletModel);
   set('f-notes',       ui.AdditionalNotes || item.AdditionalNotes);
+  set('f-shared-mailboxes', ui.SharedMailboxes || item.SharedMailboxes);
+  set('f-shared-calendars', ui.SharedCalendars || item.SharedCalendars);
   set('f-other-apps',  ui.OtherApps);
   set('t-tech-ci',     ui.TechCheckin);
   set('t-tech-pre',    ui.TechPreExchange);
