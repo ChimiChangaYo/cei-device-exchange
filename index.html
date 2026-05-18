@@ -588,7 +588,7 @@ function stampStart(key) {
   document.getElementById('total-clock').textContent = totalMinutes() + ' min';
 }
 function stampEnd(key) {
-  if (!sectionStamps[key].start || sectionStamps[key].end) return;
+  if (!sectionStamps[key].start) return;
   sectionStamps[key].end = new Date();
   updateTimerDisplay(key);
   document.getElementById('total-clock').textContent = totalMinutes() + ' min';
