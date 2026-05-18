@@ -574,8 +574,12 @@ function fmtTime(dt) {
   if (!dt) return '—';
   return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
+function calcMinutes(start, end) {
+  if (!start || !end) return 0;
+  return Math.round((end - start) / 60000);
+}
 function calcDisplay(start, end) {
-  if (!start || !end) return '0 min';
+  if (!start || !end) return '0 sec';
   const secs = Math.round((end - start) / 1000);
   if (secs < 60) return secs + ' sec';
   return Math.round(secs / 60) + ' min';
