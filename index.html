@@ -574,16 +574,19 @@ function fmtTime(dt) {
   if (!dt) return '—';
   return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
-function calcMinutes(start, end) {
-  if (!start || !end) return 0;
-  return Math.round((end - start) / 60000);
+function calcDisplay(start, end) {
+  if (!start || !end) return '0 min';
+  const secs = Math.round((end - start) / 1000);
+  if (secs < 60) return secs + ' sec';
+  return Math.round(secs / 60) + ' min';
 }
 function totalMinutes() {
   return Object.values(sectionStamps).reduce((a, s) => a + calcMinutes(s.start, s.end), 0);
 }
 function stampStart(key) {
-  if (sectionStamps[key].start) return;
-  sectionStamps[key].start = new Date();
+  if (!sectionStamps[key].start) {
+    sectionStamps[key].start = new Date();
+  }
   updateTimerDisplay(key);
   document.getElementById('total-clock').textContent = totalMinutes() + ' min';
 }
@@ -598,7 +601,7 @@ function updateTimerDisplay(key) {
   const el = document.getElementById('tdisp-' + key);
   if (!el) return;
   const started = s.start ? '▶ ' + fmtTime(s.start) : '—';
-  const ended   = s.end   ? ' · ⏹ ' + fmtTime(s.end) + ' · ' + calcMinutes(s.start, s.end) + ' min' : '';
+  const ended   = s.end   ? ' · ⏹ ' + fmtTime(s.end) + ' · ' + calcDisplay(s.start, s.end) : '';
   el.textContent = started + ended;
 }
 
