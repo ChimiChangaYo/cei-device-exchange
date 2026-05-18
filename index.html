@@ -103,11 +103,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--brand); }
 .field textarea { resize: vertical; min-height: 80px; }
 
-/* TIMER */
+/* TIMER DISPLAY */
 .timer-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.timer-display { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 72px; }
-.timer-btn { padding: 5px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 500; border: 1px solid var(--border2); background: var(--surface2); cursor: pointer; transition: all 0.15s; }
-.timer-btn.running { background: var(--success-bg); color: var(--success); border-color: transparent; }
+.timer-display { font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums; }
 
 /* CHECKLIST */
 .checklist { display: flex; flex-direction: column; gap: 2px; }
@@ -133,10 +131,6 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
 .submit-status.error { background: #fdf1f0; color: var(--brand-dark); display: flex; }
 .submit-status.loading { background: var(--surface2); color: var(--text2); display: flex; }
 
-/* SIGN-OFF */
-.signoff-input { flex: 1; min-width: 200px; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius); font-size: 13px; color: var(--text); background: var(--surface); font-family: inherit; }
-.signoff-input:focus { outline: none; border-color: var(--brand); }
-
 /* MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
@@ -147,7 +141,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
 
 /* PRINT STYLES */
 @media print {
-  .app-header, .progress-strip, .search-bar, .sidebar, .nav-btns, .submit-status, .modal-overlay, .btn, .timer-btn, .na-btn, .sl-tag { display: none !important; }
+  .app-header, .progress-strip, .search-bar, .sidebar, .nav-btns, .submit-status, .modal-overlay, .btn, .na-btn, .sl-tag { display: none !important; }
   body { background: white; font-size: 12px; }
   .layout { display: block; padding: 0; }
   .panel { display: block !important; }
@@ -163,18 +157,17 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
   input, select, textarea { border: none !important; padding: 0 !important; font-size: 12px !important; }
 }
 .print-header { display: none; }
-
 @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; } }
 </style>
 </head>
 <body>
 
 <script>
-  const FLOW_URL    = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/be0df293c8204b10882883bfc0effa79/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iDfLKWqfFCeM3rQjt1zlKcDhBpKklJbSMo2-qb8u66M";
+  const FLOW_URL        = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/be0df293c8204b10882883bfc0effa79/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iDfLKWqfFCeM3rQjt1zlKcDhBpKklJbSMo2-qb8u66M";
   const SEARCH_FLOW_URL = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9004ed19862840a88329ee250a71f11b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=6aWJJbUoBbg6nWsXzUlCH79hYQqFa1Rr8F8FpAPRanA";
-  const SP_SITE     = "https://quantaservices.sharepoint.com/sites/CEIDeviceExchange";
-  const SP_LIST     = "DeviceExchangeRecords";
-  const APP_VERSION = "3.4.9";
+  const SP_SITE         = "https://quantaservices.sharepoint.com/sites/CEIDeviceExchange";
+  const SP_LIST         = "DeviceExchangeRecords";
+  const APP_VERSION     = "3.5.0";
 </script>
 
 <!-- HEADER -->
@@ -182,7 +175,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
   <div class="logo"><span>Q</span> CEI Device Exchange</div>
   <div class="header-right">
     <span class="stage-badge" id="stage-badge">New record</span>
-    <span style="font-size:12px;color:var(--text3);" id="version-label">v3.4.9</span>
+    <span style="font-size:12px;color:var(--text3);" id="version-label">v3.5.0</span>
   </div>
 </header>
 
@@ -219,7 +212,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
     </nav>
     <div class="total-time-box">
       <div class="ttl">Total time elapsed</div>
-      <div class="val" id="total-clock">0:00:00</div>
+      <div class="val" id="total-clock">— min</div>
     </div>
     <div class="record-id-box" id="record-id-box" style="display:none;">
       Record ID<strong id="record-id-display">—</strong>
@@ -228,13 +221,13 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
   </aside>
 
   <main>
-    <!-- PRINT HEADER (print only) -->
+    <!-- PRINT HEADER -->
     <div class="print-header" id="print-header">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
         <div style="width:32px;height:32px;background:#d4281e;border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;">Q</div>
         <div>
           <div style="font-size:18px;font-weight:700;">CEI Device Exchange Checklist</div>
-          <div style="font-size:11px;color:#666;">Printed: <span id="print-date"></span> · Form v3.4.9</div>
+          <div style="font-size:11px;color:#666;">Printed: <span id="print-date"></span> · Form v3.5.0</div>
         </div>
       </div>
     </div>
@@ -325,8 +318,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
           <span class="card-title">Tech check-in</span>
           <div class="timer-row">
             <input style="width:160px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;" type="text" id="t-tech-ci" placeholder="Technician name">
-            <button class="timer-btn" id="tbtn-ci" onclick="toggleTimer('ci')">▶ Start</button>
-            <span class="timer-display" id="tdisp-ci">0:00:00</span>
+            <span class="timer-display" id="tdisp-ci">—</span>
           </div>
         </div>
         <div class="card-body"><div class="checklist" id="cl-checkin"></div></div>
@@ -355,8 +347,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
           <span class="card-title">Pre-device exchange</span>
           <div class="timer-row">
             <input style="width:160px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;" type="text" id="t-tech-pre" placeholder="Technician name">
-            <button class="timer-btn" id="tbtn-pre" onclick="toggleTimer('pre')">▶ Start</button>
-            <span class="timer-display" id="tdisp-pre">0:00:00</span>
+            <span class="timer-display" id="tdisp-pre">—</span>
           </div>
         </div>
         <div class="card-body"><div class="checklist" id="cl-pre"></div></div>
@@ -374,8 +365,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
           <span class="card-title">Device exchange</span>
           <div class="timer-row">
             <input style="width:160px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;" type="text" id="t-tech-ex" placeholder="Technician name">
-            <button class="timer-btn" id="tbtn-ex" onclick="toggleTimer('ex')">▶ Start</button>
-            <span class="timer-display" id="tdisp-ex">0:00:00</span>
+            <span class="timer-display" id="tdisp-ex">—</span>
           </div>
         </div>
         <div class="card-body"><div class="checklist" id="cl-ex"></div></div>
@@ -393,8 +383,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
           <span class="card-title">Check-out</span>
           <div class="timer-row">
             <input style="width:160px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;" type="text" id="t-tech-co" placeholder="Technician name">
-            <button class="timer-btn" id="tbtn-co" onclick="toggleTimer('co')">▶ Start</button>
-            <span class="timer-display" id="tdisp-co">0:00:00</span>
+            <span class="timer-display" id="tdisp-co">—</span>
           </div>
         </div>
         <div class="card-body"><div class="checklist" id="cl-co"></div></div>
@@ -565,25 +554,65 @@ const LISTS = {
 };
 
 /* ═══ STATE ═══ */
-const checked = {}, naState = {};
-const timers = {ci:null,pre:null,ex:null,co:null};
-const elapsed = {ci:0,pre:0,ex:0,co:0};
-const starts  = {ci:null,pre:null,ex:null,co:null};
-const devices = new Set(), apps = new Set();
+const checked  = {};
+const naState  = {};
+const devices  = new Set();
+const apps     = new Set();
 let currentRecordId = null;
-let currentStage = 'New';
-let searchTimeout = null;
+let currentStage    = 'New';
+let searchTimeout   = null;
 
-/* ═══ BUILD ═══ */
+const sectionStamps = {
+  ci:  { start: null, end: null },
+  pre: { start: null, end: null },
+  ex:  { start: null, end: null },
+  co:  { start: null, end: null },
+};
+
+/* ═══ TIMESTAMP HELPERS ═══ */
+function fmtTime(dt) {
+  if (!dt) return '—';
+  return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+function calcMinutes(start, end) {
+  if (!start || !end) return 0;
+  return Math.round((end - start) / 60000);
+}
+function totalMinutes() {
+  return Object.values(sectionStamps).reduce((a, s) => a + calcMinutes(s.start, s.end), 0);
+}
+function stampStart(key) {
+  if (sectionStamps[key].start) return;
+  sectionStamps[key].start = new Date();
+  updateTimerDisplay(key);
+  document.getElementById('total-clock').textContent = totalMinutes() + ' min';
+}
+function stampEnd(key) {
+  if (!sectionStamps[key].start || sectionStamps[key].end) return;
+  sectionStamps[key].end = new Date();
+  updateTimerDisplay(key);
+  document.getElementById('total-clock').textContent = totalMinutes() + ' min';
+}
+function updateTimerDisplay(key) {
+  const s  = sectionStamps[key];
+  const el = document.getElementById('tdisp-' + key);
+  if (!el) return;
+  const started = s.start ? '▶ ' + fmtTime(s.start) : '—';
+  const ended   = s.end   ? ' · ⏹ ' + fmtTime(s.end) + ' · ' + calcMinutes(s.start, s.end) + ' min' : '';
+  el.textContent = started + ended;
+}
+
+/* ═══ BUILD CHECKLISTS ═══ */
 function buildAll() {
-  Object.entries(LISTS).forEach(([key,cfg]) => {
+  Object.entries(LISTS).forEach(([key, cfg]) => {
     const el = document.getElementById(cfg.id);
     if (!el) return;
     el.innerHTML = '';
-    cfg.items.forEach((item,i) => {
-      const id = key+'_'+i;
+    cfg.items.forEach((item, i) => {
+      const id  = key + '_' + i;
       const row = document.createElement('div');
-      row.className = 'check-row'; row.id = 'row_'+id;
+      row.className = 'check-row';
+      row.id        = 'row_' + id;
       row.innerHTML =
         `<input type="checkbox" id="cb_${id}" onchange="onCheck('${id}')">` +
         (item.sl ? `<span class="sl-tag">SL</span>` : '') +
@@ -596,88 +625,90 @@ function buildAll() {
 
 /* ═══ CHECK / NA ═══ */
 function onCheck(id) {
-  const cb=document.getElementById('cb_'+id), row=document.getElementById('row_'+id);
-  checked[id]=cb.checked; row.classList.toggle('done',cb.checked);
-  if(cb.checked){naState[id]=false;const nb=document.getElementById('na_'+id);if(nb)nb.classList.remove('on');row.classList.remove('is-na');}
+  const cb  = document.getElementById('cb_' + id);
+  const row = document.getElementById('row_' + id);
+  checked[id] = cb.checked;
+  row.classList.toggle('done', cb.checked);
+  if (cb.checked) {
+    naState[id] = false;
+    const nb = document.getElementById('na_' + id);
+    if (nb) nb.classList.remove('on');
+    row.classList.remove('is-na');
+  }
   refresh();
 }
 function onNA(id) {
-  const nb=document.getElementById('na_'+id),cb=document.getElementById('cb_'+id),row=document.getElementById('row_'+id);
-  naState[id]=!naState[id]; nb.classList.toggle('on',naState[id]); row.classList.toggle('is-na',naState[id]);
-  if(naState[id]){cb.checked=false;checked[id]=false;row.classList.remove('done');}
+  const nb  = document.getElementById('na_' + id);
+  const cb  = document.getElementById('cb_' + id);
+  const row = document.getElementById('row_' + id);
+  naState[id] = !naState[id];
+  nb.classList.toggle('on', naState[id]);
+  row.classList.toggle('is-na', naState[id]);
+  if (naState[id]) { cb.checked = false; checked[id] = false; row.classList.remove('done'); }
   refresh();
 }
 
 /* ═══ TOGGLES ═══ */
-function togDevice(btn,name){btn.classList.toggle('on');devices.has(name)?devices.delete(name):devices.add(name);}
-function togApp(btn){btn.classList.toggle('on');const n=btn.textContent.trim();apps.has(n)?apps.delete(n):apps.add(n);}
+function togDevice(btn, name) { btn.classList.toggle('on'); devices.has(name) ? devices.delete(name) : devices.add(name); }
+function togApp(btn) { btn.classList.toggle('on'); const n = btn.textContent.trim(); apps.has(n) ? apps.delete(n) : apps.add(n); }
 
-/* ═══ TIMERS ═══ */
-function fmt(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');}
-function totalSec(){return Object.keys(elapsed).reduce((a,k)=>{let v=elapsed[k];if(starts[k])v+=Math.floor((Date.now()-starts[k])/1000);return a+v;},0);}
-function toggleTimer(key){
-  const btn=document.getElementById('tbtn-'+key);
-  if(timers[key]){elapsed[key]+=Math.floor((Date.now()-starts[key])/1000);clearInterval(timers[key]);timers[key]=null;starts[key]=null;btn.textContent='▶ Resume';btn.classList.remove('running');}
-  else{starts[key]=Date.now();btn.textContent='⏹ Stop';btn.classList.add('running');timers[key]=setInterval(()=>{const s=elapsed[key]+Math.floor((Date.now()-starts[key])/1000);document.getElementById('tdisp-'+key).textContent=fmt(s);document.getElementById('total-clock').textContent=fmt(totalSec());},1000);}
-}
+/* ═══ NAV / SHOW PANEL ═══ */
+const PANEL_GROUPS = [[], ['checkin','clerk','emp-ci'], ['pre'], ['ex'], ['co'], ['emp-co']];
+const PANEL_KEYS   = [null, 'ci', 'pre', 'ex', 'co', null];
 
-/* ═══ NAV ═══ */
-const PANEL_GROUPS=[[], ['checkin','clerk','emp-ci'], ['pre'], ['ex'], ['co'], ['emp-co']];
-const PANEL_TIMERS={1:'ci',2:'pre',3:'ex',4:'co'};
-
-function showPanel(idx){
-  const currentPanel=[...document.querySelectorAll('.panel')].findIndex(p=>p.classList.contains('active'));
-  const leavingTimer=PANEL_TIMERS[currentPanel];
-  if(leavingTimer&&timers[leavingTimer]){
-    elapsed[leavingTimer]+=Math.floor((Date.now()-starts[leavingTimer])/1000);
-    clearInterval(timers[leavingTimer]);
-    timers[leavingTimer]=null;starts[leavingTimer]=null;
-    document.getElementById('tbtn-'+leavingTimer).textContent='▶ Resume';
-    document.getElementById('tbtn-'+leavingTimer).classList.remove('running');
-  }
-  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
-  document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',i===idx));
-  if(idx===5)buildSummary();
-  const arrivingTimer=PANEL_TIMERS[idx];
-  if(arrivingTimer&&!timers[arrivingTimer]&&elapsed[arrivingTimer]===0){
-    const btn=document.getElementById('tbtn-'+arrivingTimer);
-    starts[arrivingTimer]=Date.now();
-    btn.textContent='⏹ Stop';btn.classList.add('running');
-    timers[arrivingTimer]=setInterval(()=>{
-      const s=elapsed[arrivingTimer]+Math.floor((Date.now()-starts[arrivingTimer])/1000);
-      document.getElementById('tdisp-'+arrivingTimer).textContent=fmt(s);
-      document.getElementById('total-clock').textContent=fmt(totalSec());
-    },1000);
-  }
+function showPanel(idx) {
+  const prev    = [...document.querySelectorAll('.panel')].findIndex(p => p.classList.contains('active'));
+  const prevKey = PANEL_KEYS[prev];
+  if (prevKey) stampEnd(prevKey);
+  document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === idx));
+  if (idx === 5) buildSummary();
+  const newKey = PANEL_KEYS[idx];
+  if (newKey) stampStart(newKey);
 }
 
 /* ═══ PROGRESS ═══ */
-function countAll(){let t=0,d=0;Object.keys(LISTS).forEach(k=>LISTS[k].items.forEach((_,i)=>{const id=k+'_'+i;t++;if(checked[id]||naState[id])d++;}));return{total:t,done:d};}
-function countGroup(k){let t=0,d=0;LISTS[k].items.forEach((_,i)=>{const id=k+'_'+i;t++;if(checked[id]||naState[id])d++;});return{total:t,done:d};}
-function refresh(){
-  const{total,done}=countAll();const pct=total?Math.round(done/total*100):0;
-  document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-label').textContent=done+' / '+total+' complete';
-  PANEL_GROUPS.forEach((groups,i)=>{
-    if(!groups.length){document.getElementById('npct-'+i).textContent='';return;}
-    let t=0,d=0;groups.forEach(g=>{const r=countGroup(g);t+=r.total;d+=r.done;});
-    document.getElementById('npct-'+i).textContent=t?Math.round(d/t*100)+'%':'';
+function countAll() {
+  let t = 0, d = 0;
+  Object.keys(LISTS).forEach(k => LISTS[k].items.forEach((_, i) => {
+    const id = k + '_' + i; t++;
+    if (checked[id] || naState[id]) d++;
+  }));
+  return { total: t, done: d };
+}
+function countGroup(k) {
+  let t = 0, d = 0;
+  LISTS[k].items.forEach((_, i) => { const id = k + '_' + i; t++; if (checked[id] || naState[id]) d++; });
+  return { total: t, done: d };
+}
+function refresh() {
+  const { total, done } = countAll();
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = done + ' / ' + total + ' complete';
+  PANEL_GROUPS.forEach((groups, i) => {
+    if (!groups.length) { document.getElementById('npct-' + i).textContent = ''; return; }
+    let t = 0, d = 0;
+    groups.forEach(g => { const r = countGroup(g); t += r.total; d += r.done; });
+    document.getElementById('npct-' + i).textContent = t ? Math.round(d / t * 100) + '%' : '';
   });
 }
 
 /* ═══ COLLECT DATA ═══ */
-function gv(id){const el=document.getElementById(id);return el?el.value:'';}
-function collectChecklist(){
-  const snap={};
-  Object.keys(LISTS).forEach(k=>{snap[k]=LISTS[k].items.map((item,i)=>({item:item.t,checked:!!checked[k+'_'+i],na:!!naState[k+'_'+i]}));});
+function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function collectChecklist() {
+  const snap = {};
+  Object.keys(LISTS).forEach(k => {
+    snap[k] = LISTS[k].items.map((item, i) => ({ item: item.t, checked: !!checked[k + '_' + i], na: !!naState[k + '_' + i] }));
+  });
   return snap;
 }
-function collectData(stage){
-  const ciS=elapsed.ci+(starts.ci?Math.floor((Date.now()-starts.ci)/1000):0);
-  const preS=elapsed.pre+(starts.pre?Math.floor((Date.now()-starts.pre)/1000):0);
-  const exS=elapsed.ex+(starts.ex?Math.floor((Date.now()-starts.ex)/1000):0);
-  const coS=elapsed.co+(starts.co?Math.floor((Date.now()-starts.co)/1000):0);
-  const{total,done}=countAll();
+function collectData(stage) {
+  const ciM  = calcMinutes(sectionStamps.ci.start,  sectionStamps.ci.end);
+  const preM = calcMinutes(sectionStamps.pre.start, sectionStamps.pre.end);
+  const exM  = calcMinutes(sectionStamps.ex.start,  sectionStamps.ex.end);
+  const coM  = calcMinutes(sectionStamps.co.start,  sectionStamps.co.end);
+  const { total, done } = countAll();
   const userInfo = {
     EmployeeName:    gv('f-emp-name'),
     AppointmentTime: gv('f-appt'),
@@ -702,7 +733,7 @@ function collectData(stage){
     TabletName:      gv('f-tab-name'),
     TabletSerial:    gv('f-tab-serial'),
     TabletModel:     gv('f-tab-model'),
-    KeyApplications: [...apps].join(', ')+(gv('f-other-apps')?', '+gv('f-other-apps'):''),
+    KeyApplications: [...apps].join(', ') + (gv('f-other-apps') ? ', ' + gv('f-other-apps') : ''),
     OtherApps:       gv('f-other-apps'),
     AdditionalNotes: gv('f-notes'),
     SharedMailboxes: gv('f-shared-mailboxes'),
@@ -716,51 +747,64 @@ function collectData(stage){
     EmployeeSignoff: gv('f-emp-signoff'),
   };
   return {
-    EmployeeName:    userInfo.EmployeeName||'(no name)',
-    DeviceType:      userInfo.DeviceType,
-    MigrationSite:   userInfo.MigrationSite,
-    CEIEmail:        userInfo.CEIEmail,
-    QuantaEmail:     userInfo.QuantaEmail,
-    OldDevice:       [userInfo.OldDeviceModel, userInfo.OldDeviceSerial, userInfo.OldDeviceHost].filter(Boolean).join(' / '),
-    NewDevice:       [userInfo.NewDeviceModel, userInfo.NewDeviceSerial, userInfo.NewDeviceHost].filter(Boolean).join(' / '),
-    ReceivedByTech:  userInfo.ReceivedByTech,
-    TechSignoff:     userInfo.TechSignoff,
-    EmployeeSignoff: userInfo.EmployeeSignoff,
-    KeyApplications: userInfo.KeyApplications,
-    AdditionalNotes: userInfo.AdditionalNotes,
-    SharedMailboxes: userInfo.SharedMailboxes,
-    SharedCalendars: userInfo.SharedCalendars,
-    DateReceived:    userInfo.DateReceived,
-    CheckinTime:     fmt(ciS),
-    PreExchangeTime: fmt(preS),
-    ExchangeTime:    fmt(exS),
-    CheckoutTime:    fmt(coS),
-    TotalTime:       fmt(ciS+preS+exS+coS),
-    TotalTimeSec:    ciS+preS+exS+coS,
-    ProgressPct:     total?Math.round(done/total*100):0,
-    ChecklistDetail: JSON.stringify(collectChecklist()),
-    UserInfoJSON:    JSON.stringify(userInfo),
-    SubmittedAt:     new Date().toISOString(),
-    Stage:           stage||currentStage,
-    RecordID:        currentRecordId||'',
+    EmployeeName:       userInfo.EmployeeName || '(no name)',
+    DeviceType:         userInfo.DeviceType,
+    MigrationSite:      userInfo.MigrationSite,
+    CEIEmail:           userInfo.CEIEmail,
+    QuantaEmail:        userInfo.QuantaEmail,
+    OldDevice:          [userInfo.OldDeviceModel, userInfo.OldDeviceSerial, userInfo.OldDeviceHost].filter(Boolean).join(' / '),
+    NewDevice:          [userInfo.NewDeviceModel, userInfo.NewDeviceSerial, userInfo.NewDeviceHost].filter(Boolean).join(' / '),
+    ReceivedByTech:     userInfo.ReceivedByTech,
+    TechSignoff:        userInfo.TechSignoff,
+    EmployeeSignoff:    userInfo.EmployeeSignoff,
+    KeyApplications:    userInfo.KeyApplications,
+    AdditionalNotes:    userInfo.AdditionalNotes,
+    SharedMailboxes:    userInfo.SharedMailboxes,
+    SharedCalendars:    userInfo.SharedCalendars,
+    DateReceived:       userInfo.DateReceived,
+    CheckinTime:        ciM + ' min',
+    PreExchangeTime:    preM + ' min',
+    ExchangeTime:       exM + ' min',
+    CheckoutTime:       coM + ' min',
+    TotalTime:          (ciM + preM + exM + coM) + ' min',
+    TotalTimeSec:       (ciM + preM + exM + coM) * 60,
+    CheckInStart:       fmtTime(sectionStamps.ci.start),
+    CheckInEnd:         fmtTime(sectionStamps.ci.end),
+    CheckInMinutes:     ciM,
+    PreExchangeStart:   fmtTime(sectionStamps.pre.start),
+    PreExchangeEnd:     fmtTime(sectionStamps.pre.end),
+    PreExchangeMinutes: preM,
+    ExchangeStart:      fmtTime(sectionStamps.ex.start),
+    ExchangeEnd:        fmtTime(sectionStamps.ex.end),
+    ExchangeMinutes:    exM,
+    CheckOutStart:      fmtTime(sectionStamps.co.start),
+    CheckOutEnd:        fmtTime(sectionStamps.co.end),
+    CheckOutMinutes:    coM,
+    ProgressPct:        total ? Math.round(done / total * 100) : 0,
+    ChecklistDetail:    JSON.stringify(collectChecklist()),
+    UserInfoJSON:       JSON.stringify(userInfo),
+    SubmittedAt:        new Date().toISOString(),
+    Stage:              stage || currentStage,
+    RecordID:           currentRecordId || '',
   };
 }
 
 /* ═══ SUMMARY ═══ */
-function buildSummary(){
-  const{total,done}=countAll();const pct=total?Math.round(done/total*100):0;
-  const ciS=elapsed.ci+(starts.ci?Math.floor((Date.now()-starts.ci)/1000):0);
-  const preS=elapsed.pre+(starts.pre?Math.floor((Date.now()-starts.pre)/1000):0);
-  const exS=elapsed.ex+(starts.ex?Math.floor((Date.now()-starts.ex)/1000):0);
-  const coS=elapsed.co+(starts.co?Math.floor((Date.now()-starts.co)/1000):0);
-  document.getElementById('summary-stats').innerHTML=`
+function buildSummary() {
+  const { total, done } = countAll();
+  const pct  = total ? Math.round(done / total * 100) : 0;
+  const ciM  = calcMinutes(sectionStamps.ci.start,  sectionStamps.ci.end);
+  const preM = calcMinutes(sectionStamps.pre.start, sectionStamps.pre.end);
+  const exM  = calcMinutes(sectionStamps.ex.start,  sectionStamps.ex.end);
+  const coM  = calcMinutes(sectionStamps.co.start,  sectionStamps.co.end);
+  document.getElementById('summary-stats').innerHTML = `
     <div class="stat"><div class="s-label">Complete</div><div class="s-val">${done}</div></div>
     <div class="stat"><div class="s-label">Progress</div><div class="s-val">${pct}%</div></div>
-    <div class="stat"><div class="s-label">Check-in</div><div class="s-val" style="font-size:15px">${fmt(ciS)}</div></div>
-    <div class="stat"><div class="s-label">Pre-exchange</div><div class="s-val" style="font-size:15px">${fmt(preS)}</div></div>
-    <div class="stat"><div class="s-label">Exchange</div><div class="s-val" style="font-size:15px">${fmt(exS)}</div></div>
-    <div class="stat"><div class="s-label">Check-out</div><div class="s-val" style="font-size:15px">${fmt(coS)}</div></div>
-    <div class="stat"><div class="s-label">Total time</div><div class="s-val" style="font-size:15px">${fmt(ciS+preS+exS+coS)}</div></div>
+    <div class="stat"><div class="s-label">Check-in</div><div class="s-val" style="font-size:15px">${ciM} min</div></div>
+    <div class="stat"><div class="s-label">Pre-exchange</div><div class="s-val" style="font-size:15px">${preM} min</div></div>
+    <div class="stat"><div class="s-label">Exchange</div><div class="s-val" style="font-size:15px">${exM} min</div></div>
+    <div class="stat"><div class="s-label">Check-out</div><div class="s-val" style="font-size:15px">${coM} min</div></div>
+    <div class="stat"><div class="s-label">Total time</div><div class="s-val" style="font-size:15px">${ciM + preM + exM + coM} min</div></div>
   `;
 }
 
@@ -769,39 +813,39 @@ async function saveProgress(stage) {
   const data = collectData(stage);
   if (!currentRecordId) currentRecordId = 'REC-' + Date.now();
   data.RecordID = currentRecordId;
-  data.Stage = stage;
+  data.Stage    = stage;
   updateStageBadge(stage);
   try {
-    const resp = await fetch(FLOW_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    const resp = await fetch(FLOW_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     showRecordBox(currentRecordId, stage);
     showModal('Progress saved ✓', 'Record saved for ' + data.EmployeeName + '. Search their name to resume this record when ready for the full migration.');
-  } catch(e) {
+  } catch (e) {
     showModal('Save failed', 'Could not save: ' + e.message + '. Use Export JSON as a backup.');
   }
 }
 
 /* ═══ FINAL SUBMIT ═══ */
 async function finalSubmit() {
-  const btn = document.getElementById('final-btn');
+  const btn    = document.getElementById('final-btn');
   const status = document.getElementById('submit-status');
   btn.disabled = true;
-  status.className = 'submit-status loading';
+  status.className   = 'submit-status loading';
   status.textContent = '⏳ Submitting final record…';
   const data = collectData('Complete');
   if (!currentRecordId) currentRecordId = 'REC-' + Date.now();
   data.RecordID = currentRecordId;
-  data.Stage = 'Complete';
+  data.Stage    = 'Complete';
   try {
-    const resp = await fetch(FLOW_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    if (!resp.ok) throw new Error('HTTP '+resp.status);
-    status.className = 'submit-status success';
+    const resp = await fetch(FLOW_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    status.className   = 'submit-status success';
     status.textContent = '✓ Submitted! ' + data.EmployeeName + ' · ' + data.TotalTime;
     updateStageBadge('Complete');
     showRecordBox(currentRecordId, 'Complete');
     setTimeout(() => printRecord(data), 800);
-  } catch(e) {
-    status.className = 'submit-status error';
+  } catch (e) {
+    status.className   = 'submit-status error';
     status.textContent = '✗ Failed: ' + e.message;
     btn.disabled = false;
   }
@@ -813,24 +857,19 @@ function printRecord(data) {
   window.print();
 }
 
-/* ═══ SEARCH / LOAD ═══ */
+/* ═══ SEARCH ═══ */
 function onSearchInput() {
   clearTimeout(searchTimeout);
   const q = document.getElementById('search-input').value.trim();
   if (q.length < 2) { closeSearch(); return; }
   searchTimeout = setTimeout(() => searchRecords(q), 400);
 }
-
 async function searchRecords(query) {
   const resultsEl = document.getElementById('search-results');
   resultsEl.style.display = 'block';
   resultsEl.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text3);">Searching…</div>';
   try {
-    const resp = await fetch(SEARCH_FLOW_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({query: query})
-    });
+    const resp = await fetch(SEARCH_FLOW_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const items = await resp.json();
     if (!items || !items.length) {
@@ -841,82 +880,80 @@ async function searchRecords(query) {
       const safe = JSON.stringify(item).replace(/"/g, '&quot;');
       return `<div class="search-result-item" onclick="loadRecord(${safe})">
         <div class="sr-name">${item.EmployeeName || item.Title || '(no name)'}</div>
-        <div class="sr-meta">${item.DeviceType||''} · ${item.MigrationSite||''} · Stage: ${item.Stage||'—'} · ${item.TotalTime||'0:00:00'}</div>
+        <div class="sr-meta">${item.DeviceType || ''} · ${item.MigrationSite || ''} · Stage: ${item.Stage || '—'} · ${item.TotalTime || '—'}</div>
       </div>`;
     }).join('');
-  } catch(e) {
+  } catch (e) {
     resultsEl.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text3);">Search error: ' + e.message + '</div>';
   }
 }
-
 function closeSearch() { document.getElementById('search-results').style.display = 'none'; }
 
+/* ═══ LOAD RECORD ═══ */
 function loadRecord(item) {
   closeSearch();
   document.getElementById('search-input').value = '';
-  currentRecordId = item.RecordID || 'REC-'+item.Id;
-  currentStage = item.Stage || 'In Progress';
-  // Restore checklist state from JSON
+  currentRecordId = item.RecordID || 'REC-' + item.Id;
+  currentStage    = item.Stage || 'In Progress';
   if (item.ChecklistDetail) {
     try {
       const snap = JSON.parse(item.ChecklistDetail);
       Object.keys(snap).forEach(k => {
-        snap[k].forEach((entry, i) => {type
-          const id = k+'_'+i;
-          const cb = document.getElementById('cb_'+id);
-          const nb = document.getElementById('na_'+id);
-          const row = document.getElementById('row_'+id);
-          if (cb && entry.checked) { cb.checked=true; checked[id]=true; row.classList.add('done'); }
-          if (nb && entry.na) { naState[id]=true; nb.classList.add('on'); row.classList.add('is-na'); }
+        snap[k].forEach((entry, i) => {
+          const id  = k + '_' + i;
+          const cb  = document.getElementById('cb_' + id);
+          const nb  = document.getElementById('na_' + id);
+          const row = document.getElementById('row_' + id);
+          if (cb && entry.checked) { cb.checked = true; checked[id] = true; row.classList.add('done'); }
+          if (nb && entry.na)      { naState[id] = true; nb.classList.add('on'); row.classList.add('is-na'); }
         });
       });
-    } catch(e) {}
+    } catch (e) {}
   }
-  // Restore all fields from UserInfoJSON if available, else fall back to list columns
   const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
   let ui = {};
-  if (item.UserInfoJSON) { try { ui = JSON.parse(item.UserInfoJSON); } catch(e) {} }
-  set('f-emp-name',    ui.EmployeeName    || item.EmployeeName);
-  set('f-appt',        ui.AppointmentTime);
-  set('f-date-recv',   ui.DateReceived);
-  set('f-time-recv',   ui.TimeReceived);
-  set('f-cei-upn',     ui.CEIUPN);
-  set('f-cei-email',   ui.CEIEmail        || item.CEIEmail);
-  set('f-q-email',     ui.QuantaEmail     || item.QuantaEmail);
-  set('f-quanta-acct', ui.UsingQuantaAcct);
-  set('f-temp-pw',     ui.TempPassword);
-  set('f-mig-site',    ui.MigrationSite   || item.MigrationSite);
-  set('f-recv-tech',   ui.ReceivedByTech  || item.ReceivedByTech);
-  set('f-mob-num',     ui.MobileNumber);
-  set('f-mob-serial',  ui.MobileSerial);
-  set('f-pers-phone',  ui.PersonalPhone);
-  set('f-old-model',   ui.OldDeviceModel);
-  set('f-old-serial',  ui.OldDeviceSerial);
-  set('f-old-host',    ui.OldDeviceHost);
-  set('f-new-model',   ui.NewDeviceModel);
-  set('f-new-serial',  ui.NewDeviceSerial);
-  set('f-new-host',    ui.NewDeviceHost);
-  set('f-tab-name',    ui.TabletName);
-  set('f-tab-serial',  ui.TabletSerial);
-  set('f-tab-model',   ui.TabletModel);
-  set('f-notes',       ui.AdditionalNotes || item.AdditionalNotes);
+  if (item.UserInfoJSON) { try { ui = JSON.parse(item.UserInfoJSON); } catch (e) {} }
+  set('f-emp-name',         ui.EmployeeName    || item.EmployeeName);
+  set('f-appt',             ui.AppointmentTime);
+  set('f-date-recv',        ui.DateReceived);
+  set('f-time-recv',        ui.TimeReceived);
+  set('f-cei-upn',          ui.CEIUPN);
+  set('f-cei-email',        ui.CEIEmail        || item.CEIEmail);
+  set('f-q-email',          ui.QuantaEmail     || item.QuantaEmail);
+  set('f-quanta-acct',      ui.UsingQuantaAcct);
+  set('f-temp-pw',          ui.TempPassword);
+  set('f-mig-site',         ui.MigrationSite   || item.MigrationSite);
+  set('f-recv-tech',        ui.ReceivedByTech  || item.ReceivedByTech);
+  set('f-mob-num',          ui.MobileNumber);
+  set('f-mob-serial',       ui.MobileSerial);
+  set('f-pers-phone',       ui.PersonalPhone);
+  set('f-old-model',        ui.OldDeviceModel);
+  set('f-old-serial',       ui.OldDeviceSerial);
+  set('f-old-host',         ui.OldDeviceHost);
+  set('f-new-model',        ui.NewDeviceModel);
+  set('f-new-serial',       ui.NewDeviceSerial);
+  set('f-new-host',         ui.NewDeviceHost);
+  set('f-tab-name',         ui.TabletName);
+  set('f-tab-serial',       ui.TabletSerial);
+  set('f-tab-model',        ui.TabletModel);
+  set('f-notes',            ui.AdditionalNotes || item.AdditionalNotes);
   set('f-shared-mailboxes', ui.SharedMailboxes || item.SharedMailboxes);
   set('f-shared-calendars', ui.SharedCalendars || item.SharedCalendars);
-  set('f-other-apps',  ui.OtherApps);
-  set('t-tech-ci',     ui.TechCheckin);
-  set('t-tech-pre',    ui.TechPreExchange);
-  set('t-tech-ex',     ui.TechExchange);
-  set('t-tech-co',     ui.TechCheckout);
-  set('f-tech-signoff',ui.TechSignoff     || item.TechSignoff);
-  set('f-emp-signoff', ui.EmployeeSignoff || item.EmployeeSignoff);
+  set('f-other-apps',       ui.OtherApps);
+  set('t-tech-ci',          ui.TechCheckin);
+  set('t-tech-pre',         ui.TechPreExchange);
+  set('t-tech-ex',          ui.TechExchange);
+  set('t-tech-co',          ui.TechCheckout);
+  set('f-tech-signoff',     ui.TechSignoff     || item.TechSignoff);
+  set('f-emp-signoff',      ui.EmployeeSignoff || item.EmployeeSignoff);
   const dt = ui.DeviceType || item.DeviceType || '';
-  if (dt) { dt.split(', ').forEach(d => { document.querySelectorAll('#device-toggles .tog').forEach(btn => { if(btn.textContent.trim().includes(d)){btn.classList.add('on');devices.add(d);} }); }); }
+  if (dt) { dt.split(', ').forEach(d => { document.querySelectorAll('#device-toggles .tog').forEach(btn => { if (btn.textContent.trim().includes(d)) { btn.classList.add('on'); devices.add(d); } }); }); }
   const ka = ui.KeyApplications || item.KeyApplications || '';
-  if (ka) { document.querySelectorAll('#app-toggles .tog').forEach(btn => { if(ka.includes(btn.textContent.trim())){btn.classList.add('on');apps.add(btn.textContent.trim());} }); }
+  if (ka) { document.querySelectorAll('#app-toggles .tog').forEach(btn => { if (ka.includes(btn.textContent.trim())) { btn.classList.add('on'); apps.add(btn.textContent.trim()); } }); }
   updateStageBadge(currentStage);
   showRecordBox(currentRecordId, currentStage);
   refresh();
-  showModal('Record loaded ✓', item.EmployeeName + ' — ' + (item.Stage||'In Progress') + '. Continue from where you left off.');
+  showModal('Record loaded ✓', item.EmployeeName + ' — ' + (item.Stage || 'In Progress') + '. Continue from where you left off.');
 }
 
 /* ═══ UI HELPERS ═══ */
@@ -924,41 +961,44 @@ function updateStageBadge(stage) {
   currentStage = stage;
   const b = document.getElementById('stage-badge');
   b.textContent = stage;
-  b.className = 'stage-badge ' + (stage==='Complete'?'complete':stage==='Check-in'?'checkin':'inprogress');
+  b.className   = 'stage-badge ' + (stage === 'Complete' ? 'complete' : stage === 'Check-in' ? 'checkin' : 'inprogress');
 }
 function showRecordBox(id, stage) {
   document.getElementById('record-id-box').style.display = 'block';
-  document.getElementById('record-id-display').textContent = id;
+  document.getElementById('record-id-display').textContent  = id;
   document.getElementById('record-stage-display').textContent = stage;
 }
 function showModal(title, body) {
   document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').textContent = body;
+  document.getElementById('modal-body').textContent  = body;
   document.getElementById('save-modal').classList.add('show');
 }
 function closeModal() { document.getElementById('save-modal').classList.remove('show'); }
+
 function resetForm() {
   if (currentRecordId && !confirm('Start a new record? Unsaved progress will be lost.')) return;
-  currentRecordId = null; currentStage = 'New';
-  Object.keys(checked).forEach(k=>delete checked[k]);
-  Object.keys(naState).forEach(k=>delete naState[k]);
-  devices.clear(); apps.clear();
-  document.querySelectorAll('.tog').forEach(b=>b.classList.remove('on'));
-  document.querySelectorAll('input[type=text],input[type=date],input[type=time],select,textarea').forEach(el=>el.value='');
-  document.querySelectorAll('input[type=checkbox]').forEach(cb=>{cb.checked=false;});
-  document.querySelectorAll('.check-row').forEach(r=>r.classList.remove('done','is-na'));
-  document.querySelectorAll('.na-btn').forEach(b=>b.classList.remove('on'));
-  Object.keys(elapsed).forEach(k=>{elapsed[k]=0;starts[k]=null;});
-  Object.keys(timers).forEach(k=>{if(timers[k]){clearInterval(timers[k]);timers[k]=null;}});
-  ['ci','pre','ex','co'].forEach(k=>{document.getElementById('tdisp-'+k).textContent='0:00:00';document.getElementById('tbtn-'+k).textContent='▶ Start';document.getElementById('tbtn-'+k).classList.remove('running');});
-  document.getElementById('total-clock').textContent='0:00:00';
-  document.getElementById('record-id-box').style.display='none';
-  document.getElementById('stage-badge').textContent='New record';
-  document.getElementById('stage-badge').className='stage-badge';
-  document.getElementById('submit-status').className='submit-status';
-  document.getElementById('final-btn').disabled=false;
-  document.getElementById('final-btn').textContent='✓ Final submit & print';
-  showPanel(0); refresh();
+  currentRecordId = null;
+  currentStage    = 'New';
+  Object.keys(checked).forEach(k => delete checked[k]);
+  Object.keys(naState).forEach(k => delete naState[k]);
+  devices.clear();
+  apps.clear();
+  document.querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('input[type=text],input[type=date],input[type=time],select,textarea').forEach(el => el.value = '');
+  document.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('.check-row').forEach(r => r.classList.remove('done', 'is-na'));
+  document.querySelectorAll('.na-btn').forEach(b => b.classList.remove('on'));
+  Object.keys(sectionStamps).forEach(k => { sectionStamps[k] = { start: null, end: null }; });
+  ['ci','pre','ex','co'].forEach(k => { const el = document.getElementById('tdisp-' + k); if (el) el.textContent = '—'; });
+  document.getElementById('total-clock').textContent        = '— min';
+  document.getElementById('record-id-box').style.display   = 'none';
+  document.getElementById('stage-badge').textContent       = 'New record';
+  document.getElementById('stage-badge').className         = 'stage-badge';
+  document.getElementById('submit-status').className       = 'submit-status';
+  document.getElementById('final-btn').disabled            = false;
+  document.getElementById('final-btn').textContent         = '✓ Final submit & print';
+  showPanel(0);
+  refresh();
 }
 
 /* ═══ INIT ═══ */
