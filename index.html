@@ -690,6 +690,15 @@ function collectData(stage) {
     DeviceType:[...devices].join(', '),
     TechCheckin:gv('t-tech-ci'), TechPreExchange:gv('t-tech-pre'), TechExchange:gv('t-tech-ex'), TechCheckout:gv('t-tech-co'),
     TechSignoff:gv('f-tech-signoff'), EmployeeSignoff:gv('f-emp-signoff'),
+    EmployeeSignoff: gv('f-emp-signoff'),
+    CheckInStartRaw:     sectionStamps.ci.start  ? sectionStamps.ci.start.toISOString()  : '',
+    CheckInEndRaw:       sectionStamps.ci.end    ? sectionStamps.ci.end.toISOString()    : '',
+    PreExchangeStartRaw: sectionStamps.pre.start ? sectionStamps.pre.start.toISOString() : '',
+    PreExchangeEndRaw:   sectionStamps.pre.end   ? sectionStamps.pre.end.toISOString()   : '',
+    ExchangeStartRaw:    sectionStamps.ex.start  ? sectionStamps.ex.start.toISOString()  : '',
+    ExchangeEndRaw:      sectionStamps.ex.end    ? sectionStamps.ex.end.toISOString()    : '',
+    CheckOutStartRaw:    sectionStamps.co.start  ? sectionStamps.co.start.toISOString()  : '',
+    CheckOutEndRaw:      sectionStamps.co.end    ? sectionStamps.co.end.toISOString()    : '',
   };
   return {
     EmployeeName:userInfo.EmployeeName||'(no name)', DeviceType:userInfo.DeviceType, MigrationSite:userInfo.MigrationSite,
@@ -810,6 +819,16 @@ function loadRecord(item) {
   const set=(id,val)=>{const el=document.getElementById(id);if(el&&val)el.value=val;};
   let ui={};
   if(item.UserInfoJSON){try{ui=JSON.parse(item.UserInfoJSON);}catch(e){}}
+  if(ui.CheckInStartRaw)     sectionStamps.ci.start  = new Date(ui.CheckInStartRaw);
+  if(ui.CheckInEndRaw)       sectionStamps.ci.end    = new Date(ui.CheckInEndRaw);
+  if(ui.PreExchangeStartRaw) sectionStamps.pre.start = new Date(ui.PreExchangeStartRaw);
+  if(ui.PreExchangeEndRaw)   sectionStamps.pre.end   = new Date(ui.PreExchangeEndRaw);
+  if(ui.ExchangeStartRaw)    sectionStamps.ex.start  = new Date(ui.ExchangeStartRaw);
+  if(ui.ExchangeEndRaw)      sectionStamps.ex.end    = new Date(ui.ExchangeEndRaw);
+  if(ui.CheckOutStartRaw)    sectionStamps.co.start  = new Date(ui.CheckOutStartRaw);
+  if(ui.CheckOutEndRaw)      sectionStamps.co.end    = new Date(ui.CheckOutEndRaw);
+  ['ci','pre','ex','co'].forEach(k => updateTimerDisplay(k));
+  document.getElementById('total-clock').textContent = totalMinutes();
   set('f-emp-name',ui.EmployeeName||item.EmployeeName); set('f-appt',ui.AppointmentTime);
   set('f-date-recv',ui.DateReceived); set('f-time-recv',ui.TimeReceived);
   set('f-cei-upn',ui.CEIUPN); set('f-cei-email',ui.CEIEmail||item.CEIEmail);
