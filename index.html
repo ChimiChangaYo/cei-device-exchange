@@ -138,7 +138,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
   const FLOW_URL        = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/be0df293c8204b10882883bfc0effa79/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iDfLKWqfFCeM3rQjt1zlKcDhBpKklJbSMo2-qb8u66M";
   const SEARCH_FLOW_URL = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9004ed19862840a88329ee250a71f11b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=6aWJJbUoBbg6nWsXzUlCH79hYQqFa1Rr8F8FpAPRanA";
   const APP_VERSION     = "3.6.0";
-  const TECHNICIANS     = ["Brent Labs", "Scafford Simmons", "Jared Reiley", "Jonathan Dodds", "Tesla Titleman", "Sam Urban-Hoppe", "Miguel Grullon", "Stanley Acosta", "Alisha Valente"];
+  const TECHNICIANS     = ["Brent Labs", "Scafford Simmons", "Jared Reilley", "Jonathan Dodds", "Tesla Titleman", "Sam Urban-Hoppe", "Miguel Grullon", "Stanley Acosta", "Alisha Valente"];
 </script>
 
 <header class="app-header">
@@ -263,14 +263,14 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
             <button class="tog" onclick="togApp(this)">Power BI Pro</button>
             <button class="tog" onclick="togApp(this)">Adobe</button>
           </div>
-          <div class="field" style="margin-top:12px;"><label>Other applications</label><input type="text" id="f-other-apps" placeholder="List additional apps…"></div>
+          <div class="field" style="margin-top:12px;"><label>Other applications</label><input type="text" id="f-other-apps" placeholder="List additional apps…" maxlength="255"></div>
           <div class="field" style="margin-top:12px;"><label>Shared mailboxes</label><textarea id="f-shared-mailboxes" placeholder="List shared mailboxes, one per line…"></textarea></div>
           <div class="field" style="margin-top:12px;"><label>Shared calendars</label><textarea id="f-shared-calendars" placeholder="List shared calendars, one per line…"></textarea></div>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title">Additional notes / issues</span></div>
-        <div class="card-body"><textarea id="f-notes" style="width:100%;border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;" placeholder="Special circumstances, non-standard apps, photos, files on phone, calendar needs…"></textarea></div>
+        <textarea id="f-notes" style="width:100%;border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;" placeholder="Special circumstances, non-standard apps, photos, files on phone, calendar needs…" maxlength="255"></textarea>
       </div>
       <div class="nav-btns" style="display:flex;justify-content:flex-end;margin-top:4px;">
         <button class="btn btn-primary" onclick="showPanel(1)">Next: Check-in →</button>
@@ -747,6 +747,8 @@ async function confirmSave() {
   await saveProgress(stage);
 }
 async function saveProgress(stage) {
+  const prev = [...document.querySelectorAll('.panel')].findIndex(p => p.classList.contains('active'));
+  if (PANEL_KEYS[prev]) stampEnd(PANEL_KEYS[prev]);
   const data = collectData(stage);
   if (!currentRecordId) currentRecordId = 'REC-' + Date.now();
   data.RecordID = currentRecordId; data.Stage = stage;
