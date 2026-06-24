@@ -674,8 +674,8 @@ function calcDisplay(s, e) {
   return secs < 60 ? secs + ' sec' : Math.round(secs / 60) + ' min';
 }
 function totalMinutes() {
-  const ciM  = calcMinutes(sectionStamps.ci.start, sectionStamps.ci.end);
-  const preM = 1;
+  const ciM  = 1;
+  const preM = calcMinutes(sectionStamps.pre.start, sectionStamps.pre.end);
   const exM  = calcMinutes(sectionStamps.ex.start, sectionStamps.ex.end);
   const coM  = calcMinutes(sectionStamps.co.start, sectionStamps.co.end);
   return ciM + preM + exM + coM;
@@ -785,8 +785,8 @@ function collectChecklist() {
   const snap={}; Object.keys(LISTS).forEach(k=>{snap[k]=LISTS[k].items.map((item,i)=>({item:item.t,checked:!!checked[k+'_'+i],na:!!naState[k+'_'+i]}));}); return snap;
 }
 function collectData(stage) {
-  const ciM  = calcMinutes(sectionStamps.ci.start, sectionStamps.ci.end);
-  const preM = 1; // hardcoded — pre-exchange always 1 min
+  const ciM  = 1; // hardcoded — check-in always 1 min
+  const preM = calcMinutes(sectionStamps.pre.start, sectionStamps.pre.end);
   const exM  = calcMinutes(sectionStamps.ex.start, sectionStamps.ex.end);
   const coM  = calcMinutes(sectionStamps.co.start, sectionStamps.co.end);
   const {total,done}=countAll();
@@ -838,8 +838,8 @@ function collectData(stage) {
 /* ═══ SUMMARY ═══ */
 function buildSummary() {
   const {total,done}=countAll(); const pct=total?Math.round(done/total*100):0;
-  const ciM  = calcMinutes(sectionStamps.ci.start, sectionStamps.ci.end);
-  const preM = 1;
+  const ciM  = 1;
+  const preM = calcMinutes(sectionStamps.pre.start, sectionStamps.pre.end);
   const exM  = calcMinutes(sectionStamps.ex.start, sectionStamps.ex.end);
   const coM  = calcMinutes(sectionStamps.co.start, sectionStamps.co.end);
   document.getElementById('summary-stats').innerHTML=`
