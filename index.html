@@ -86,7 +86,11 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
 .field label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
 .field input, .field select, .field textarea { padding: 8px 10px; border: 1px solid var(--border2); border-radius: var(--radius); font-size: 13px; color: var(--text); background: var(--surface); font-family: inherit; width: 100%; }
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--brand); }
+.field input[readonly], .field input[readonly]:focus { background: var(--surface2); color: var(--text2); cursor: not-allowed; border-color: var(--border); outline: none; }
 .field textarea { resize: vertical; min-height: 80px; }
+.field-error { font-size: 11px; color: var(--brand); margin-top: 2px; display: none; }
+.field-error.show { display: block; }
+.field input.error, .field select.error { border-color: var(--brand); }
 .timer-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .timer-display { font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums; }
 .checklist { display: flex; flex-direction: column; gap: 2px; }
@@ -137,7 +141,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
 <script>
   const FLOW_URL        = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/be0df293c8204b10882883bfc0effa79/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iDfLKWqfFCeM3rQjt1zlKcDhBpKklJbSMo2-qb8u66M";
   const SEARCH_FLOW_URL = "https://default78d5360854ca4a748beb8a1399c118.9c.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9004ed19862840a88329ee250a71f11b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=6aWJJbUoBbg6nWsXzUlCH79hYQqFa1Rr8F8FpAPRanA";
-  const APP_VERSION     = "3.6.0";
+  const APP_VERSION     = "3.7.0";
   const TECHNICIANS     = ["Brent Labs", "Scafford Simmons", "Jared Reilley", "Jonathan Dodds", "Tesla Titleman", "Sam Urban-Hoppe", "Miguel Grullon", "Stanley Acosta", "Alisha Valente", "Ehab Meawad", "Dennis Stroble", "Sam Lada", "Derek Weinstein", "Sam Ly", "Gary Yanez", "Daniel Murphy", "Chris Organ", "Abel Gutierrez", "Michele Haywood", "Benjamin Mbong", "Irwin Cortez", "Ash Babu", "Glenn Utley", "Aaron Davis", "Heather Morgensen"];
 </script>
 
@@ -145,7 +149,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
   <div class="logo"><span>Q</span> CEI Device Exchange</div>
   <div class="header-right">
     <span class="stage-badge" id="stage-badge">New record</span>
-    <span style="font-size:12px;color:var(--text3);">v3.6.0</span>
+    <span style="font-size:12px;color:var(--text3);">v3.7.0</span>
   </div>
 </header>
 
@@ -167,15 +171,15 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
     <nav class="nav-card">
       <div class="nav-item active" id="nav-0" onclick="showPanel(0)"><span class="nav-label">User info</span><span class="nav-pct" id="npct-0"></span></div>
       <div class="nav-divider"></div>
-      <div class="nav-item" id="nav-1" onclick="showPanel(1)"><span class="nav-label">Check-in</span><span class="nav-pct" id="npct-1"></span></div>
+      <div class="nav-item" id="nav-1" onclick="navClick(1)"><span class="nav-label">Check-in</span><span class="nav-pct" id="npct-1"></span></div>
       <div class="nav-divider"></div>
-      <div class="nav-item" id="nav-2" onclick="showPanel(2)"><span class="nav-label">Pre-exchange</span><span class="nav-pct" id="npct-2"></span></div>
+      <div class="nav-item" id="nav-2" onclick="navClick(2)"><span class="nav-label">Pre-exchange</span><span class="nav-pct" id="npct-2"></span></div>
       <div class="nav-divider"></div>
-      <div class="nav-item" id="nav-3" onclick="showPanel(3)"><span class="nav-label">Exchange</span><span class="nav-pct" id="npct-3"></span></div>
+      <div class="nav-item" id="nav-3" onclick="navClick(3)"><span class="nav-label">Exchange</span><span class="nav-pct" id="npct-3"></span></div>
       <div class="nav-divider"></div>
-      <div class="nav-item" id="nav-4" onclick="showPanel(4)"><span class="nav-label">Check-out</span><span class="nav-pct" id="npct-4"></span></div>
+      <div class="nav-item" id="nav-4" onclick="navClick(4)"><span class="nav-label">Check-out</span><span class="nav-pct" id="npct-4"></span></div>
       <div class="nav-divider"></div>
-      <div class="nav-item" id="nav-5" onclick="showPanel(5)"><span class="nav-label">Sign-off &amp; submit</span><span class="nav-pct" id="npct-5"></span></div>
+      <div class="nav-item" id="nav-5" onclick="navClick(5)"><span class="nav-label">Sign-off &amp; submit</span><span class="nav-pct" id="npct-5"></span></div>
     </nav>
     <div class="total-time-box">
       <div class="ttl">Total time elapsed</div>
@@ -193,7 +197,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
         <div style="width:32px;height:32px;background:#d4281e;border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;">Q</div>
         <div>
           <div style="font-size:18px;font-weight:700;">CEI Device Exchange Checklist</div>
-          <div style="font-size:11px;color:#666;">Printed: <span id="print-date"></span> · Form v3.6.0</div>
+          <div style="font-size:11px;color:#666;">Printed: <span id="print-date"></span> · Form v3.7.0</div>
         </div>
       </div>
     </div>
@@ -204,9 +208,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
         <div class="card-header"><span class="card-title">Device type</span></div>
         <div class="card-body">
           <div class="toggle-group" id="device-toggles">
-            <button class="tog" onclick="togDevice(this,'Computer')">💻 Computer</button>
-            <button class="tog" onclick="togDevice(this,'Phone')">📱 Phone</button>
-            <button class="tog" onclick="togDevice(this,'Tablet')">📋 Tablet</button>
+            <button class="tog" id="tog-computer" onclick="togDevice(this,'Computer')">💻 Computer</button>
+            <button class="tog" id="tog-phone" onclick="togDevice(this,'Phone')">📱 Phone</button>
+            <button class="tog" id="tog-tablet" onclick="togDevice(this,'Tablet')">📋 Tablet</button>
           </div>
         </div>
       </div>
@@ -216,15 +220,23 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
           <div class="field-grid">
             <div class="field"><label>Employee name</label><input type="text" id="f-emp-name" placeholder="Full name"></div>
             <div class="field"><label>Appointment time</label><input type="time" id="f-appt"></div>
-            <div class="field"><label>Date received</label><input type="date" id="f-date-recv"></div>
+            <div class="field"><label>Date received</label><input type="date" id="f-date-recv" readonly></div>
             <div class="field"><label>Time received</label><input type="time" id="f-time-recv"></div>
             <div class="field"><label>CEI UPN</label><input type="text" id="f-cei-upn" placeholder="user@cei.com"></div>
-            <div class="field"><label>CEI email</label><input type="text" id="f-cei-email" placeholder="user@cei.com"></div>
+            <div class="field">
+              <label>CEI email</label>
+              <input type="text" id="f-cei-email" placeholder="user@cei.com">
+              <span class="field-error" id="err-cei-email">CEI email is required before proceeding.</span>
+            </div>
             <div class="field"><label>Quanta email</label><input type="text" id="f-q-email" placeholder="user@quantaservices.com"></div>
             <div class="field"><label>Using Quanta account?</label><select id="f-quanta-acct"><option value="">— select —</option><option>Yes</option><option>No</option></select></div>
             <div class="field"><label>Temp password tested</label><input type="text" id="f-temp-pw" placeholder="Test password"></div>
-            <div class="field"><label>Migration site</label><input type="text" id="f-mig-site"></div>
-            <div class="field"><label>Received by technician</label><select id="f-recv-tech"><option value="">— select —</option></select></div>
+            <div class="field"><label>Migration site</label><input type="text" id="f-mig-site" value="Remote" readonly></div>
+            <div class="field">
+              <label>Received by technician</label>
+              <select id="f-recv-tech"><option value="">— select —</option></select>
+              <span class="field-error" id="err-recv-tech">Received by technician is required before proceeding.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -232,8 +244,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
         <div class="card-header"><span class="card-title">Company mobile</span></div>
         <div class="card-body">
           <div class="field-grid">
-            <div class="field"><label>Company mobile number</label><input type="text" id="f-mob-num" placeholder="(___) ___-____" oninput="fmtPhone(this)" maxlength="14"></div>
-            <div class="field"><label>Mobile serial</label><input type="text" id="f-mob-serial"></div>
+            <div class="field"><label>Company mobile number</label><input type="text" id="f-mob-num" placeholder="(___) ___-____" oninput="fmtPhone(this);autoDevice();" maxlength="14"></div>
+            <div class="field"><label>Mobile serial</label><input type="text" id="f-mob-serial" oninput="autoDevice()"></div>
             <div class="field"><label>Personal phone</label><input type="text" id="f-pers-phone" placeholder="(___) ___-____" oninput="fmtPhone(this)" maxlength="14"></div>
           </div>
         </div>
@@ -242,15 +254,15 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
         <div class="card-header"><span class="card-title">Devices</span></div>
         <div class="card-body">
           <div class="field-grid">
-            <div class="field"><label>Old device model</label><input type="text" id="f-old-model"></div>
-            <div class="field"><label>Old device serial</label><input type="text" id="f-old-serial"></div>
-            <div class="field"><label>Old device hostname</label><input type="text" id="f-old-host"></div>
+            <div class="field"><label>Old device model</label><input type="text" id="f-old-model" oninput="autoDevice()"></div>
+            <div class="field"><label>Old device serial</label><input type="text" id="f-old-serial" oninput="autoDevice()"></div>
+            <div class="field"><label>Old device hostname</label><input type="text" id="f-old-host" oninput="autoDevice()"></div>
             <div class="field"><label>New device model</label><input type="text" id="f-new-model"></div>
             <div class="field"><label>New device serial</label><input type="text" id="f-new-serial"></div>
             <div class="field"><label>New device hostname</label><input type="text" id="f-new-host"></div>
-            <div class="field"><label>Tablet name</label><input type="text" id="f-tab-name"></div>
-            <div class="field"><label>Tablet serial</label><input type="text" id="f-tab-serial"></div>
-            <div class="field"><label>Tablet model</label><input type="text" id="f-tab-model"></div>
+            <div class="field"><label>Tablet name</label><input type="text" id="f-tab-name" oninput="autoDevice()"></div>
+            <div class="field"><label>Tablet serial</label><input type="text" id="f-tab-serial" oninput="autoDevice()"></div>
+            <div class="field"><label>Tablet model</label><input type="text" id="f-tab-model" oninput="autoDevice()"></div>
           </div>
         </div>
       </div>
@@ -270,10 +282,10 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title">Additional notes / issues</span></div>
-        <textarea id="f-notes" style="width:100%;border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;" placeholder="Special circumstances, non-standard apps, photos, files on phone, calendar needs…" maxlength="255"></textarea>
+        <div class="card-body"><textarea id="f-notes" style="width:100%;border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;" placeholder="Special circumstances, non-standard apps, photos, files on phone, calendar needs…" maxlength="255"></textarea></div>
       </div>
       <div class="nav-btns" style="display:flex;justify-content:flex-end;margin-top:4px;">
-        <button class="btn btn-primary" onclick="showPanel(1)">Next: Check-in →</button>
+        <button class="btn btn-primary" onclick="tryAdvanceFromUserInfo()">Next: Check-in →</button>
       </div>
     </div>
 
@@ -418,11 +430,24 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: v
       <select id="save-status-select" style="width:100%;padding:9px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;">
         <option value="Check-In Complete | Awaiting Delivery">Check-In Complete | Awaiting Delivery</option>
         <option value="No Show">No Show</option>
+        <option value="See Notes">See Notes</option>
       </select>
     </div>
     <div class="modal-btns">
       <button class="btn btn-primary" onclick="confirmSave()">💾 Save</button>
       <button class="btn" onclick="closeStatusModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE CONFIRMATION MODAL -->
+<div class="modal-overlay" id="mobile-modal">
+  <div class="modal">
+    <h2>No mobile number entered</h2>
+    <p>Please confirm you have checked Microsoft Teams and Quanta systems and this user has no company mobile number on record.</p>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="confirmNoMobile()">✓ Confirmed — no mobile number</button>
+      <button class="btn" onclick="closeMobileModal()">← Go back and check</button>
     </div>
   </div>
 </div>
@@ -547,6 +572,7 @@ const LISTS = {
 /* ═══ STATE ═══ */
 const checked = {}, naState = {}, devices = new Set(), apps = new Set();
 let currentRecordId = null, currentStage = 'New', searchTimeout = null;
+let pendingPanelIdx = null;
 const sectionStamps = {
   ci:  { start: null, end: null },
   pre: { start: null, end: null },
@@ -576,6 +602,69 @@ function buildTechDropdowns() {
   });
 }
 
+/* ═══ DEVICE AUTO-SELECT ═══ */
+function autoDevice() {
+  const hasComputer = ['f-old-model','f-old-serial','f-old-host'].some(id => document.getElementById(id).value.trim() !== '');
+  const hasPhone    = ['f-mob-num','f-mob-serial'].some(id => document.getElementById(id).value.trim() !== '');
+  const hasTablet   = ['f-tab-name','f-tab-serial','f-tab-model'].some(id => document.getElementById(id).value.trim() !== '');
+
+  const togComputer = document.getElementById('tog-computer');
+  const togPhone    = document.getElementById('tog-phone');
+  const togTablet   = document.getElementById('tog-tablet');
+
+  if (hasComputer) { togComputer.classList.add('on'); devices.add('Computer'); }
+  if (hasPhone)    { togPhone.classList.add('on');    devices.add('Phone'); }
+  if (hasTablet)   { togTablet.classList.add('on');   devices.add('Tablet'); }
+}
+
+/* ═══ REQUIRED FIELD VALIDATION ═══ */
+function validateUserInfo() {
+  let valid = true;
+  const email = document.getElementById('f-cei-email').value.trim();
+  const tech  = document.getElementById('f-recv-tech').value;
+  const errEmail = document.getElementById('err-cei-email');
+  const errTech  = document.getElementById('err-recv-tech');
+  const emailEl  = document.getElementById('f-cei-email');
+  const techEl   = document.getElementById('f-recv-tech');
+
+  if (!email) {
+    errEmail.classList.add('show'); emailEl.classList.add('error'); valid = false;
+  } else {
+    errEmail.classList.remove('show'); emailEl.classList.remove('error');
+  }
+  if (!tech) {
+    errTech.classList.add('show'); techEl.classList.add('error'); valid = false;
+  } else {
+    errTech.classList.remove('show'); techEl.classList.remove('error');
+  }
+  return valid;
+}
+
+/* ═══ ADVANCE FROM USER INFO WITH GATES ═══ */
+function tryAdvanceFromUserInfo() {
+  if (!validateUserInfo()) {
+    document.getElementById('f-cei-email').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  const mob = document.getElementById('f-mob-num').value.trim();
+  if (!mob) {
+    pendingPanelIdx = 1;
+    document.getElementById('mobile-modal').classList.add('show');
+    return;
+  }
+  showPanel(1);
+}
+
+function confirmNoMobile() {
+  document.getElementById('mobile-modal').classList.remove('show');
+  showPanel(pendingPanelIdx || 1);
+  pendingPanelIdx = null;
+}
+function closeMobileModal() {
+  document.getElementById('mobile-modal').classList.remove('show');
+  pendingPanelIdx = null;
+}
+
 /* ═══ TIMESTAMP HELPERS ═══ */
 function fmtTime(dt) { if (!dt) return '—'; return dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' }); }
 function calcMinutes(s, e) { if (!s || !e) return 0; return Math.round((e - s) / 60000); }
@@ -584,7 +673,13 @@ function calcDisplay(s, e) {
   const secs = Math.round((e - s) / 1000);
   return secs < 60 ? secs + ' sec' : Math.round(secs / 60) + ' min';
 }
-function totalMinutes() { return Object.values(sectionStamps).reduce((a, s) => a + calcMinutes(s.start, s.end), 0); }
+function totalMinutes() {
+  const ciM  = calcMinutes(sectionStamps.ci.start, sectionStamps.ci.end);
+  const preM = 1;
+  const exM  = calcMinutes(sectionStamps.ex.start, sectionStamps.ex.end);
+  const coM  = calcMinutes(sectionStamps.co.start, sectionStamps.co.end);
+  return ciM + preM + exM + coM;
+}
 function stampStart(key) {
   if (!sectionStamps[key].start) sectionStamps[key].start = new Date();
   updateTimerDisplay(key);
@@ -639,6 +734,25 @@ function onNA(id) {
 function togDevice(btn, name) { btn.classList.toggle('on'); devices.has(name)?devices.delete(name):devices.add(name); }
 function togApp(btn) { btn.classList.toggle('on'); const n=btn.textContent.trim(); apps.has(n)?apps.delete(n):apps.add(n); }
 
+/* ═══ NAV CLICK GATE ═══ */
+function navClick(idx) {
+  const currentPanel = [...document.querySelectorAll('.panel')].findIndex(p => p.classList.contains('active'));
+  if (currentPanel === 0 && idx > 0) {
+    pendingPanelIdx = idx;
+    if (!validateUserInfo()) {
+      document.getElementById('f-cei-email').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      pendingPanelIdx = null;
+      return;
+    }
+    const mob = document.getElementById('f-mob-num').value.trim();
+    if (!mob) {
+      document.getElementById('mobile-modal').classList.add('show');
+      return;
+    }
+  }
+  showPanel(idx);
+}
+
 /* ═══ NAV ═══ */
 const PANEL_GROUPS = [[], ['checkin','clerk','emp-ci'], ['pre'], ['ex'], ['co'], ['emp-co']];
 const PANEL_KEYS   = [null, 'ci', 'pre', 'ex', 'co', null];
@@ -671,15 +785,16 @@ function collectChecklist() {
   const snap={}; Object.keys(LISTS).forEach(k=>{snap[k]=LISTS[k].items.map((item,i)=>({item:item.t,checked:!!checked[k+'_'+i],na:!!naState[k+'_'+i]}));}); return snap;
 }
 function collectData(stage) {
-  const ciM=calcMinutes(sectionStamps.ci.start,sectionStamps.ci.end);
-  const preM=calcMinutes(sectionStamps.pre.start,sectionStamps.pre.end);
-  const exM=calcMinutes(sectionStamps.ex.start,sectionStamps.ex.end);
-  const coM=calcMinutes(sectionStamps.co.start,sectionStamps.co.end);
+  const ciM  = calcMinutes(sectionStamps.ci.start, sectionStamps.ci.end);
+  const preM = 1; // hardcoded — pre-exchange always 1 min
+  const exM  = calcMinutes(sectionStamps.ex.start, sectionStamps.ex.end);
+  const coM  = calcMinutes(sectionStamps.co.start, sectionStamps.co.end);
   const {total,done}=countAll();
   const userInfo = {
-    EmployeeName:gv('f-emp-name'), AppointmentTime:gv('f-appt'), DateReceived:gv('f-date-recv'), TimeReceived:gv('f-time-recv'),
+    EmployeeName:    gv('f-emp-name').trim(),
+    AppointmentTime: gv('f-appt'), DateReceived:gv('f-date-recv'), TimeReceived:gv('f-time-recv'),
     CEIUPN:gv('f-cei-upn'), CEIEmail:gv('f-cei-email'), QuantaEmail:gv('f-q-email'), UsingQuantaAcct:gv('f-quanta-acct'),
-    TempPassword:gv('f-temp-pw'), MigrationSite:gv('f-mig-site'), ReceivedByTech:gv('f-recv-tech'),
+    TempPassword:gv('f-temp-pw'), MigrationSite:'Remote', ReceivedByTech:gv('f-recv-tech'),
     MobileNumber:gv('f-mob-num'), MobileSerial:gv('f-mob-serial'), PersonalPhone:gv('f-pers-phone'),
     OldDeviceModel:gv('f-old-model'), OldDeviceSerial:gv('f-old-serial'), OldDeviceHost:gv('f-old-host'),
     NewDeviceModel:gv('f-new-model'), NewDeviceSerial:gv('f-new-serial'), NewDeviceHost:gv('f-new-host'),
@@ -690,7 +805,6 @@ function collectData(stage) {
     DeviceType:[...devices].join(', '),
     TechCheckin:gv('t-tech-ci'), TechPreExchange:gv('t-tech-pre'), TechExchange:gv('t-tech-ex'), TechCheckout:gv('t-tech-co'),
     TechSignoff:gv('f-tech-signoff'), EmployeeSignoff:gv('f-emp-signoff'),
-    EmployeeSignoff: gv('f-emp-signoff'),
     CheckInStartRaw:     sectionStamps.ci.start  ? sectionStamps.ci.start.toISOString()  : '',
     CheckInEndRaw:       sectionStamps.ci.end    ? sectionStamps.ci.end.toISOString()    : '',
     PreExchangeStartRaw: sectionStamps.pre.start ? sectionStamps.pre.start.toISOString() : '',
@@ -701,7 +815,7 @@ function collectData(stage) {
     CheckOutEndRaw:      sectionStamps.co.end    ? sectionStamps.co.end.toISOString()    : '',
   };
   return {
-    EmployeeName:userInfo.EmployeeName||'(no name)', DeviceType:userInfo.DeviceType, MigrationSite:userInfo.MigrationSite,
+    EmployeeName:    userInfo.EmployeeName||'(no name)', DeviceType:userInfo.DeviceType, MigrationSite:'Remote',
     CEIEmail:userInfo.CEIEmail, QuantaEmail:userInfo.QuantaEmail,
     OldDevice:[userInfo.OldDeviceModel,userInfo.OldDeviceSerial,userInfo.OldDeviceHost].filter(Boolean).join(' / '),
     NewDevice:[userInfo.NewDeviceModel,userInfo.NewDeviceSerial,userInfo.NewDeviceHost].filter(Boolean).join(' / '),
@@ -724,10 +838,10 @@ function collectData(stage) {
 /* ═══ SUMMARY ═══ */
 function buildSummary() {
   const {total,done}=countAll(); const pct=total?Math.round(done/total*100):0;
-  const ciM=calcMinutes(sectionStamps.ci.start,sectionStamps.ci.end);
-  const preM=calcMinutes(sectionStamps.pre.start,sectionStamps.pre.end);
-  const exM=calcMinutes(sectionStamps.ex.start,sectionStamps.ex.end);
-  const coM=calcMinutes(sectionStamps.co.start,sectionStamps.co.end);
+  const ciM  = calcMinutes(sectionStamps.ci.start, sectionStamps.ci.end);
+  const preM = 1;
+  const exM  = calcMinutes(sectionStamps.ex.start, sectionStamps.ex.end);
+  const coM  = calcMinutes(sectionStamps.co.start, sectionStamps.co.end);
   document.getElementById('summary-stats').innerHTML=`
     <div class="stat"><div class="s-label">Complete</div><div class="s-val">${done}</div></div>
     <div class="stat"><div class="s-label">Progress</div><div class="s-val">${pct}%</div></div>
@@ -830,12 +944,16 @@ function loadRecord(item) {
   if(ui.CheckOutStartRaw)    sectionStamps.co.start  = new Date(ui.CheckOutStartRaw);
   if(ui.CheckOutEndRaw)      sectionStamps.co.end    = new Date(ui.CheckOutEndRaw);
   ['ci','pre','ex','co'].forEach(k => updateTimerDisplay(k));
-  document.getElementById('total-clock').textContent = totalMinutes();
+  document.getElementById('total-clock').textContent = totalMinutes() + ' min';
+
+  // Always overwrite date with today
+  document.getElementById('f-date-recv').valueAsDate = new Date();
+
   set('f-emp-name',ui.EmployeeName||item.EmployeeName); set('f-appt',ui.AppointmentTime);
-  set('f-date-recv',ui.DateReceived); set('f-time-recv',ui.TimeReceived);
+  set('f-time-recv',ui.TimeReceived);
   set('f-cei-upn',ui.CEIUPN); set('f-cei-email',ui.CEIEmail||item.CEIEmail);
   set('f-q-email',ui.QuantaEmail||item.QuantaEmail); set('f-quanta-acct',ui.UsingQuantaAcct);
-  set('f-temp-pw',ui.TempPassword); set('f-mig-site',ui.MigrationSite||item.MigrationSite);
+  set('f-temp-pw',ui.TempPassword);
   set('f-recv-tech',ui.ReceivedByTech||item.ReceivedByTech);
   set('f-mob-num',ui.MobileNumber); set('f-mob-serial',ui.MobileSerial); set('f-pers-phone',ui.PersonalPhone);
   set('f-old-model',ui.OldDeviceModel); set('f-old-serial',ui.OldDeviceSerial); set('f-old-host',ui.OldDeviceHost);
@@ -880,11 +998,13 @@ function resetForm() {
   Object.keys(checked).forEach(k=>delete checked[k]); Object.keys(naState).forEach(k=>delete naState[k]);
   devices.clear(); apps.clear();
   document.querySelectorAll('.tog').forEach(b=>b.classList.remove('on'));
-  document.querySelectorAll('input[type=text],input[type=date],input[type=time],textarea').forEach(el=>el.value='');
+  document.querySelectorAll('input[type=text],input[type=time],textarea').forEach(el=>el.value='');
   document.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
   document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);
   document.querySelectorAll('.check-row').forEach(r=>r.classList.remove('done','is-na'));
   document.querySelectorAll('.na-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.field input.error, .field select.error').forEach(e=>e.classList.remove('error'));
   Object.keys(sectionStamps).forEach(k=>sectionStamps[k]={start:null,end:null});
   ['ci','pre','ex','co'].forEach(k=>{const el=document.getElementById('tdisp-'+k);if(el)el.textContent='—';});
   document.getElementById('total-clock').textContent='— min';
@@ -893,6 +1013,7 @@ function resetForm() {
   document.getElementById('submit-status').className='submit-status';
   document.getElementById('final-btn').disabled=false; document.getElementById('final-btn').textContent='✓ Final submit & print';
   document.getElementById('f-date-recv').valueAsDate=new Date();
+  document.getElementById('f-mig-site').value='Remote';
   showPanel(0); refresh();
 }
 
@@ -901,6 +1022,7 @@ buildAll();
 buildTechDropdowns();
 refresh();
 document.getElementById('f-date-recv').valueAsDate = new Date();
+document.getElementById('f-mig-site').value = 'Remote';
 </script>
 </body>
 </html>
